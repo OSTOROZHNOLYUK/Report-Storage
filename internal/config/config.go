@@ -15,7 +15,7 @@ type Config struct {
 	Env         string `yaml:"env" env-default:"prod"`
 	StoragePath string `yaml:"storage_path" env-required:"true"`
 	//
-	// Закомментированныеполя ниже понадобятся позже, при развертывании
+	// Закомментированные поля ниже понадобятся позже, при развертывании
 	// на удаленной машине.
 	// StorageUser   string `yaml:"storage_user" env:"DB_USER" env-required:"true"`
 	// StoragePasswd string `yaml:"storage_passwd" env:"DB_PASSWD" env-required:"true"`
