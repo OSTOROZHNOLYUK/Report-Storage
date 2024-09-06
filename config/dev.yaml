@@ -1,0 +1,9 @@
+env: "dev" # окружение сервера. Варианты: local, dev, prod
+storage_path: "mongodb://194.54.157.224:10501/" # адрес для подключения к MongoDB
+storage_user: "admin" # пользователь для аутентификации в MongoDB
+storage_passwd: # пароль для аутентификации в MongoDB
+http_server:
+  address: "0.0.0.0:80"
+  read_timeout: 5s
+  write_timeout: 10s
+  idle_timeout: 60s

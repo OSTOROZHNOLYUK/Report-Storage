@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -29,6 +30,10 @@ type Storage struct {
 
 // New - обертка для конструктора пула подключений new.
 func New(cfg *config.Config) *Storage {
+	// Для запуска на локалхосте без авторизации нужно закомментировать
+	// строчку ниже и раскомментировать под ней.
+	//
+	// opts := setOpts(cfg.StoragePath, cfg.StorageUser, cfg.StoragePasswd)
 	opts := setOptsNoPasswd(cfg.StoragePath)
 	storage, err := new(opts)
 	if err != nil {
@@ -37,19 +42,16 @@ func New(cfg *config.Config) *Storage {
 	return storage
 }
 
-// setOpts возвращает опции нового подключения с авторизацией.
-// Пока закомментировал, чтобы IDE не ругалась.
-//
-// func setOpts(path, user, password string) *options.ClientOptions {
-// 	credential := options.Credential{
-// 		AuthMechanism: "SCRAM-SHA-256",
-// 		AuthSource:    "admin",
-// 		Username:      user,
-// 		Password:      password,
-// 	}
-// 	opts := options.Client().ApplyURI(path).SetAuth(credential)
-// 	return opts
-// }
+func setOpts(path, user, password string) *options.ClientOptions {
+	credential := options.Credential{
+		AuthMechanism: "SCRAM-SHA-256",
+		AuthSource:    "admin",
+		Username:      user,
+		Password:      password,
+	}
+	opts := options.Client().ApplyURI(path).SetAuth(credential)
+	return opts
+}
 
 // setOptsNoPasswd возвращает опции нового подключения без авторизации.
 func setOptsNoPasswd(path string) *options.ClientOptions {
@@ -68,6 +70,22 @@ func new(opts *options.ClientOptions) (*Storage, error) {
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
 	err = db.Ping(context.Background(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", operation, err)
+	}
+
+	// Создаем уникальный индекс по полю number, чтобы избежать
+	// дублирования значений. И геопространственный индекс для работы
+	// с координатами.
+	collection := db.Database(dbName).Collection(colName)
+	indexUniq := mongo.IndexModel{
+		Keys:    bson.D{{Key: "number", Value: -1}},
+		Options: options.Index().SetUnique(true),
+	}
+	indexGeo := mongo.IndexModel{
+		Keys: bson.D{{Key: "geo", Value: "2dsphere"}},
+	}
+	_, err = collection.Indexes().CreateMany(tm, []mongo.IndexModel{indexUniq, indexGeo})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}

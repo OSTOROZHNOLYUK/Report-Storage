@@ -12,18 +12,15 @@ import (
 
 // Структура конфиг файла
 type Config struct {
-	Env         string `yaml:"env" env-default:"prod"`
-	StoragePath string `yaml:"storage_path" env-required:"true"`
-	//
-	// Закомментированные поля ниже понадобятся позже, при развертывании
-	// на удаленной машине.
-	// StorageUser   string `yaml:"storage_user" env:"DB_USER" env-required:"true"`
-	// StoragePasswd string `yaml:"storage_passwd" env:"DB_PASSWD" env-required:"true"`
-	HTTPServer `yaml:"http_server"`
+	Env           string `yaml:"env" env-default:"prod"`
+	StoragePath   string `yaml:"storage_path" env-required:"true"`
+	StorageUser   string `yaml:"storage_user" env-default:"admin"`
+	StoragePasswd string `yaml:"storage_passwd" env:"MONGO_DB_PASSWD" env-required:"true"`
+	HTTPServer    `yaml:"http_server"`
 }
 type HTTPServer struct {
-	Address      string        `yaml:"address" env-default:"0.0.0.0:80"`
-	AddressTLS   string        `yaml:"addressTLS" env-default:"0.0.0.0:443"`
+	Address string `yaml:"address" env-default:"0.0.0.0:80"`
+	// AddressTLS   string        `yaml:"addressTLS" env-default:"0.0.0.0:443"`
 	ReadTimeout  time.Duration `yaml:"read_timeout" env-default:"4s"`
 	WriteTimeout time.Duration `yaml:"write_timeout" env-default:"4s"`
 	IdleTimeout  time.Duration `yaml:"idle_timeout" env-default:"60s"`
