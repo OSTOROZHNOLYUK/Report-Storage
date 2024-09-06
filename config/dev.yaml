@@ -3,7 +3,7 @@ storage_path: "mongodb://194.54.157.224:10501/" # адрес для подклю
 storage_user: "admin" # пользователь для аутентификации в MongoDB
 storage_passwd: # пароль для аутентификации в MongoDB
 http_server:
-  address: "0.0.0.0:80"
+  address: "0.0.0.0:10502"
   read_timeout: 5s
   write_timeout: 10s
   idle_timeout: 60s
