@@ -33,8 +33,8 @@ func New(cfg *config.Config) *Storage {
 	// Для запуска на локалхосте без авторизации нужно закомментировать
 	// строчку ниже и раскомментировать под ней.
 	//
-	// opts := setOpts(cfg.StoragePath, cfg.StorageUser, cfg.StoragePasswd)
-	opts := setOptsNoPasswd(cfg.StoragePath)
+	opts := setOpts(cfg.StoragePath, cfg.StorageUser, cfg.StoragePasswd)
+	// opts := setOptsNoPasswd(cfg.StoragePath)
 	storage, err := new(opts)
 	if err != nil {
 		log.Fatalf("failed to init storage: %s", err.Error())
