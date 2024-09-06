@@ -6,8 +6,7 @@ WORKDIR /go/src/reports
 
 COPY . .
 
-RUN go mod tidy \
-    go mod download
+RUN go mod download
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./cmd/main.go
 
@@ -17,7 +16,7 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root
 
-ENV RS_CONFIG_PATH=/root/config/dev.yaml MONGO_DB_PASSWD=pass
+ENV RS_CONFIG_PATH=/root/config/dev.yaml
 
 RUN mkdir -p /root/config
 
