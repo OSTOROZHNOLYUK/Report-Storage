@@ -22,7 +22,7 @@ RUN mkdir -p /root/config
 
 COPY --from=builder /go/src/reports/config ./config
 
-COPY --from=builder /go/src/reports/cmd/main .
+COPY --from=builder /go/src/reports/main .
 
 EXPOSE 10502
 
