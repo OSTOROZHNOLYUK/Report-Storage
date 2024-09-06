@@ -17,7 +17,7 @@ RUN apk --no-cache add ca-certificates
 
 WORKDIR /root
 
-ENV CONFIG_PATH=/root/config/dev.yaml
+ENV RS_CONFIG_PATH=/root/config/dev.yaml MONGO_DB_PASSWD=pass
 
 RUN mkdir -p /root/config
 
@@ -25,6 +25,6 @@ COPY --from=builder /go/src/reports/config ./config
 
 COPY --from=builder /go/src/reports/cmd/main .
 
-EXPOSE 10501
+EXPOSE 10502
 
 ENTRYPOINT [ "main" ]
