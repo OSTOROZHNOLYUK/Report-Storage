@@ -11,11 +11,17 @@ import (
 
 var (
 	ErrNoData = errors.New("no data")
+
+	ErrIncorrectNum   = errors.New("incorrect report number")
+	ErrReportNotFound = errors.New("report not found")
 )
 
-// Целочисленные константы статусов заявки.
+// Status - целочисленное выражение статуса заявки.
+type Status int
+
+// Константы статусов заявки.
 const (
-	Unverified = 1 + iota
+	Unverified Status = 1 + iota
 	Opened
 	InProgress
 	Closed
@@ -71,5 +77,5 @@ type Report struct {
 
 	// Status содержит целочисленную константу, отражающую текущий
 	// статус заявки.
-	Status int `json:"status" bson:"status"`
+	Status Status `json:"status" bson:"status"`
 }
