@@ -31,6 +31,8 @@ func AddReport(log *slog.Logger, st ReportAdder) http.HandlerFunc {
 		}
 		slog.Debug("request body decoded")
 
+		// TODO: валидация полей заявки.
+
 		ctx := r.Context()
 		err = st.AddReport(ctx, rep)
 		if err != nil {

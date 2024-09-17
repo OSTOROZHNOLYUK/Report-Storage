@@ -10,7 +10,7 @@ import (
 )
 
 type Reporter interface {
-	Reports(ctx context.Context) ([]storage.Report, error)
+	Reports(ctx context.Context, status []storage.Status) ([]storage.Report, error)
 }
 
 func Reports(log *slog.Logger, st Reporter) http.HandlerFunc {
@@ -19,8 +19,11 @@ func Reports(log *slog.Logger, st Reporter) http.HandlerFunc {
 
 		log.Info("new request to receive all reports")
 
+		// TODO: получение статусов.
+
+		var status []storage.Status
 		ctx := r.Context()
-		reports, err := st.Reports(ctx)
+		reports, err := st.Reports(ctx, status)
 		if err != nil {
 			log.Error("cannot receive all reports from DB", logger.Err(err), slog.String("op", operation))
 			http.Error(w, "internal error", http.StatusInternalServerError)
