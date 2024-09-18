@@ -54,9 +54,9 @@ func setOpts(path, user, password string) *options.ClientOptions {
 }
 
 // setOptsNoPasswd возвращает опции нового подключения без авторизации.
-func setOptsNoPasswd(path string) *options.ClientOptions {
-	return options.Client().ApplyURI(path)
-}
+// func setOptsNoPasswd(path string) *options.ClientOptions {
+// 	return options.Client().ApplyURI(path)
+// }
 
 // new - конструктор пула подключений к БД.
 func new(opts *options.ClientOptions) (*Storage, error) {

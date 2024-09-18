@@ -13,6 +13,7 @@ var (
 	ErrNoData = errors.New("no data")
 
 	ErrIncorrectNum   = errors.New("incorrect report number")
+	ErrIncorrectID    = errors.New("incorrect report objectid")
 	ErrReportNotFound = errors.New("report not found")
 )
 

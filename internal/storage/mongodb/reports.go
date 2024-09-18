@@ -9,20 +9,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Reports возвращает все заявки из БД отсортированными по номеру
-// в убывающем порядке.
+// Reports возвращает заявки из БД отсортированными по номеру в
+// убывающем порядке. Вторым параметром принимает слайс статусов
+// и возвращает все заявки с указанными статусами. Если передать
+// nil или пустой слайс, то вернет все заявки.
 func (s *Storage) Reports(ctx context.Context, status []storage.Status) ([]storage.Report, error) {
 	const operation = "storage.mongodb.Reports"
 
 	var reports []storage.Report
 	collection := s.db.Database(dbName).Collection(colName)
 
+	// Задаем фильтр по статусам, если они переданы.
 	filter := bson.D{}
-
-	// TODO: фильтр по статусам.
-	//
-	// if status != nil && len(status) > 0 {
-	// }
+	if len(status) > 0 {
+		filter = bson.D{
+			{Key: "status", Value: bson.M{"$in": status}},
+		}
+	}
 
 	// Устанавливаем сортировку по полю number в убывающем порядке.
 	opts := options.Find().SetSort(bson.D{{Key: "number", Value: -1}})

@@ -72,14 +72,9 @@ func (s *Storage) trun() error {
 func Test_new(t *testing.T) {
 	opts := setOpts(path, "admin", os.Getenv("MONGO_DB_PASSWD"))
 
-	// Пустое присваивание, чтобы IDE не ругался на функцию setOptsNoPasswd,
-	// что она нигде не используется.
-	test := setOptsNoPasswd(path)
-	_ = test
-
 	st, err := new(opts)
 	if err != nil {
-		t.Fatal(err.Error())
+		t.Fatal(err)
 	}
 	st.Close()
 }
