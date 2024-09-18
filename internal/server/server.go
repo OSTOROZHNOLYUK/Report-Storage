@@ -10,26 +10,28 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // Server - структура сервера.
 type Server struct {
 	srv *http.Server
-	mux *http.ServeMux
+	mux *chi.Mux
 }
 
 // New - конструктор сервера.
 func New(cfg *config.Config) *Server {
-	m := http.NewServeMux()
+	r := chi.NewRouter()
 	server := &Server{
 		srv: &http.Server{
 			Addr:         cfg.Address,
-			Handler:      m,
+			Handler:      r,
 			ReadTimeout:  cfg.ReadTimeout,
 			WriteTimeout: cfg.WriteTimeout,
 			IdleTimeout:  cfg.IdleTimeout,
 		},
-		mux: m,
+		mux: r,
 	}
 	return server
 }
@@ -48,8 +50,9 @@ func (s *Server) Start() {
 
 // API инициализирует все обработчики API.
 func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
-	s.mux.HandleFunc("POST /api/reports/new", api.AddReport(log, st))
-	s.mux.HandleFunc("GET /api/reports/all", api.Reports(log, st))
+	s.mux.Post("/api/reports/new", api.AddReport(log, st))
+
+	s.mux.Get("/api/reports/all", api.Reports(log, st))
 }
 
 // Shutdown останавливает сервер используя graceful shutdown.
