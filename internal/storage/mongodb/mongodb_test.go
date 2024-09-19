@@ -32,14 +32,14 @@ var reports = []storage.Report{
 		Description: "Описание заявки 2",
 		Contacts:    storage.Contacts{Email: "bill@gmail.com", Whatsapp: "+71234567890"},
 		Media:       []string{"https://google.com"},
-		Geo:         storage.Geo{Coordinates: [2]float64{55.75388130172051, 37.62026781374883}},
+		Geo:         storage.Geo{Coordinates: [2]float64{55.75909434896026, 37.619124583054855}},
 	},
 	{
 		Number:      3,
 		Address:     "Адрес 3",
 		Description: "Описание заявки 3",
 		Media:       []string{"https://google.com"},
-		Geo:         storage.Geo{Coordinates: [2]float64{55.75388130172051, 37.62026781374883}},
+		Geo:         storage.Geo{Coordinates: [2]float64{59.939543808173305, 30.31511987692599}},
 	},
 }
 

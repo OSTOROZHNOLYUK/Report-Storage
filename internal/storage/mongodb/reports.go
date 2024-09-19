@@ -41,7 +41,7 @@ func (s *Storage) Reports(ctx context.Context, status []storage.Status) ([]stora
 		return nil, fmt.Errorf("%s: %w", operation, err)
 	}
 	if len(reports) == 0 {
-		return nil, fmt.Errorf("%s: %w", operation, storage.ErrNoData)
+		return nil, fmt.Errorf("%s: %w", operation, storage.ErrArrayNotFound)
 	}
 
 	// Меняем местами долготу и широту.
