@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// splitStatus преобразует строку с числами из query параметра
+// в слайс статусов.
 func splitStatus(s string) []storage.Status {
 	var status []storage.Status
 	if s == "" {

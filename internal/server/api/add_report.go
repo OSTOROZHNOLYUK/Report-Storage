@@ -10,10 +10,13 @@ import (
 	"github.com/go-chi/render"
 )
 
+// ReportAdder - интерфейс для БД в обработчике AddReport.
 type ReportAdder interface {
 	AddReport(context.Context, storage.Report) error
 }
 
+// AddReport обрабатывает запрос на добавление новой заявки в хранилище.
+// При успехе возвращает код 201.
 func AddReport(l *slog.Logger, st ReportAdder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.AddReport"
@@ -33,7 +36,7 @@ func AddReport(l *slog.Logger, st ReportAdder) http.HandlerFunc {
 			http.Error(w, "incorrect report data", http.StatusBadRequest)
 			return
 		}
-		slog.Debug("request body decoded")
+		log.Debug("request body decoded")
 
 		// TODO: валидация полей заявки.
 
@@ -44,7 +47,7 @@ func AddReport(l *slog.Logger, st ReportAdder) http.HandlerFunc {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-		slog.Debug("new report added successfully")
+		log.Debug("new report added successfully")
 
 		render.Status(r, http.StatusCreated)
 	}
