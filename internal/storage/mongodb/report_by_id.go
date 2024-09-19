@@ -11,7 +11,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// ReportByID возвращает заявку по ее ObjectID.
+// ReportByID возвращает заявку по ее ObjectID. Аргумент id должен быть
+// валидной hex строкой. Если id пустая строка или имеет некорректный
+// формат, то вернет ошибку ErrIncorrectID. Если документ с указанным
+// id не найден, то вернет ошибку ErrReportNotFound.
 func (s *Storage) ReportByID(ctx context.Context, id string) (storage.Report, error) {
 	const operation = "storage.mongodb.ReportByID"
 

@@ -9,7 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// AddReport добавляет одну новую заявку в БД.
+// AddReport добавляет одну новую заявку в БД. Не осуществляет валидацию
+// rep, ожидает полностью валидную заявку.
 func (s *Storage) AddReport(ctx context.Context, rep storage.Report) error {
 	const operation = "storage.mongodb.AddReport"
 

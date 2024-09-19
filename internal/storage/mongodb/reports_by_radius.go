@@ -8,6 +8,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+// ReportsByRadius возвращает все заявки в радиусе от точки с фильтрацией
+// по статусам. Если в параметр status передать nil или пустой слайс, то
+// вернет все заявки. r - радиус в метрах; p - структура точки координат
+// storage.Geo, где поле Type должно иметь значение "Point". Не проверяет
+// принимаемые аргументы, ожидает полностью валидные значения. Если заявки
+// не найдены, то вернет ошибку ErrArrayNotFound.
 func (s *Storage) ReportsByRadius(ctx context.Context, r int, p storage.Geo, status []storage.Status) ([]storage.Report, error) {
 	const operation = "storage.mongodb.ReportsByRadius"
 

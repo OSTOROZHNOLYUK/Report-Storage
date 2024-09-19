@@ -10,7 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// ReportByNum возвращает заявку по ее уникальному номеру.
+// ReportByNum возвращает заявку по ее уникальному номеру. Аргумент num
+// должен быть больше 0, иначе вернет ошибку ErrIncorrectNum. Если документ
+// с указанным номером не найден, то вернет ошибку ErrReportNotFound.
 func (s *Storage) ReportByNum(ctx context.Context, num int) (storage.Report, error) {
 	const operation = "storage.mongodb.ReportByNum"
 
