@@ -30,7 +30,7 @@ const (
 
 // Geo - тип данных географических координат точки.
 type Geo struct {
-	// Type - тип объекта, в нашем случае всегда Point.
+	// Type - тип объекта, в нашем случае всегда значение "Point".
 	Type string `json:"type" bson:"type"`
 	// Coordinates - координаты, первый элемент - широта, второй элемент - долгота.
 	Coordinates [2]float64 `json:"coordinates" bson:"coordinates"`
@@ -78,4 +78,15 @@ type Report struct {
 	// Status содержит целочисленную константу, отражающую текущий
 	// статус заявки.
 	Status Status `json:"status" bson:"status"`
+}
+
+// Filter - структура фильтра для получения заявок.
+type Filter struct {
+	// Count отражает необходимое количество заявок, должно быть > 0.
+	Count int
+	// Sort указывает порядок сортировки по номеру, значение должно
+	// быть 1 для восходящего и -1 для нисходящего порядков.
+	Sort int
+	// Слайс статусов.
+	Status []Status
 }

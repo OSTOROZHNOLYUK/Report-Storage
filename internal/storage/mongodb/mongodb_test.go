@@ -62,6 +62,24 @@ func (s *Storage) addOne(rep storage.Report) (string, error) {
 	return hex.Hex(), nil
 }
 
+// getOne возвращает заявку по ObjectID. Функция для использования в тестах.
+func (s *Storage) getOne(id string) (storage.Report, error) {
+
+	var report storage.Report
+	collection := s.db.Database(dbName).Collection(colName)
+
+	obj, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return report, err
+	}
+	filter := bson.D{{Key: "_id", Value: obj}}
+	err = collection.FindOne(context.Background(), filter).Decode(&report)
+	if err != nil {
+		return report, err
+	}
+	return report, nil
+}
+
 // trun удаляет все записи в колекции. Функция для использования в тестах.
 func (s *Storage) trun() error {
 	collection := s.db.Database(dbName).Collection(colName)
