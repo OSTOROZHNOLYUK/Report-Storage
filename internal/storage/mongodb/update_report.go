@@ -28,6 +28,9 @@ func (s *Storage) UpdateReport(ctx context.Context, rep storage.Report) (storage
 	if _, err := primitive.ObjectIDFromHex(rep.ID.Hex()); err != nil {
 		return origin, fmt.Errorf("%s: %w", operation, storage.ErrIncorrectID)
 	}
+	if !checkStatus(rep.Status) {
+		return origin, fmt.Errorf("%s: %w", operation, storage.ErrIncorrectStatus)
+	}
 
 	rep.Updated = time.Now()
 

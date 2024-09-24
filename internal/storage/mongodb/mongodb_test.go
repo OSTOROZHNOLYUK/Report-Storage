@@ -96,3 +96,30 @@ func Test_new(t *testing.T) {
 	}
 	st.Close()
 }
+
+func Test_checkStatus(t *testing.T) {
+
+	tests := []struct {
+		name   string
+		status storage.Status
+		want   bool
+	}{
+		{
+			name:   "OK",
+			status: 1,
+			want:   true,
+		},
+		{
+			name:   "Error",
+			status: 6,
+			want:   false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := checkStatus(tt.status); got != tt.want {
+				t.Errorf("checkStatus() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

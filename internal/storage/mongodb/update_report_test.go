@@ -26,6 +26,20 @@ func TestStorage_UpdateReport(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Вставляем в коллекцию тестовые заявки и вновь получаем их.
+	var want []storage.Report
+	for _, v := range reports {
+		id, err := st.addOne(v)
+		if err != nil {
+			t.Fatal(err)
+		}
+		w, err := st.getOne(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		want = append(want, w)
+	}
+
 	type args struct {
 		number int
 		desc   string
@@ -51,6 +65,12 @@ func TestStorage_UpdateReport(t *testing.T) {
 			wantErr:   true,
 		},
 		{
+			name:      "Error Incorrect status",
+			reportNum: 1,
+			args:      args{number: 2, desc: "Новое описание заявки 2", media: []string{}, status: 6},
+			wantErr:   true,
+		},
+		{
 			name:      "Error Not found",
 			reportNum: 2,
 			args:      args{number: 4, desc: "Новое описание заявки 3", media: []string{}, status: 1},
@@ -60,17 +80,7 @@ func TestStorage_UpdateReport(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			// Вставляем в коллекцию тестовую заявку и получаем ее.
-			id, err := st.addOne(reports[tt.reportNum])
-			if err != nil {
-				t.Fatal(err)
-			}
-			want, err := st.getOne(id)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			new := want
+			new := want[tt.reportNum]
 			new.Number = int64(tt.args.number)
 			new.Description = tt.args.desc
 			new.Media = tt.args.media
@@ -85,8 +95,8 @@ func TestStorage_UpdateReport(t *testing.T) {
 				t.Errorf("Storage.UpdateReport() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, want) {
-				t.Errorf("Storage.UpdateReport() = %v, want %v", got, want)
+			if !reflect.DeepEqual(got, want[tt.reportNum]) {
+				t.Errorf("Storage.UpdateReport() = %v, want %v", got, want[tt.reportNum])
 			}
 		})
 	}

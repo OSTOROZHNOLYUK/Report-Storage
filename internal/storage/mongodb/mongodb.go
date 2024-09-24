@@ -3,6 +3,7 @@ package mongodb
 
 import (
 	"Report-Storage/internal/config"
+	"Report-Storage/internal/storage"
 	"context"
 	"fmt"
 	"log"
@@ -96,4 +97,13 @@ func new(opts *options.ClientOptions) (*Storage, error) {
 // Close - обертка для закрытия пула подключений.
 func (s *Storage) Close() error {
 	return s.db.Disconnect(context.Background())
+}
+
+// checkStatus проверяет аргумент status на соответствие константам
+// из пакета storage.
+func checkStatus(status storage.Status) bool {
+	if status > 0 && status < 6 {
+		return true
+	}
+	return false
 }

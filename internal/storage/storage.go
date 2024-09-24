@@ -10,10 +10,11 @@ import (
 )
 
 var (
-	ErrIncorrectNum   = errors.New("incorrect report number")
-	ErrIncorrectID    = errors.New("incorrect report objectid")
-	ErrReportNotFound = errors.New("report not found")
-	ErrArrayNotFound  = errors.New("reports array not found")
+	ErrIncorrectNum    = errors.New("incorrect report number")
+	ErrIncorrectID     = errors.New("incorrect report objectid")
+	ErrIncorrectStatus = errors.New("incorrect report status")
+	ErrReportNotFound  = errors.New("report not found")
+	ErrArrayNotFound   = errors.New("reports array not found")
 )
 
 // Status - целочисленное выражение статуса заявки.
@@ -89,4 +90,9 @@ type Filter struct {
 	Sort int
 	// Слайс статусов.
 	Status []Status
+}
+
+// Statistic - структура статистики заявок со статусами.
+type Statistic struct {
+	Total, Unverified, Opened, InProgress, Closed, Rejected int
 }
