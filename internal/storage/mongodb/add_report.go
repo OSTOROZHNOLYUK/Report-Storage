@@ -31,7 +31,7 @@ func (s *Storage) AddReport(ctx context.Context, rep storage.Report) error {
 	rep.Geo.Coordinates[0], rep.Geo.Coordinates[1] = rep.Geo.Coordinates[1], rep.Geo.Coordinates[0]
 
 	// Производим вставку новой заявки.
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	_, err := collection.InsertOne(ctx, rep)
 	if err != nil {
 		return fmt.Errorf("%s: %w", operation, err)

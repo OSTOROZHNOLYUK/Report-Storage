@@ -14,7 +14,7 @@ import (
 func (s *Storage) DeleteRejected(ctx context.Context) (int, error) {
 	const operation = "storage.mongodb.DeleteRejected"
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "status", Value: storage.Rejected}}
 	res, err := collection.DeleteMany(ctx, filter)
 	if err != nil {

@@ -15,7 +15,7 @@ func (s *Storage) Statistic(ctx context.Context) (storage.Statistic, error) {
 	const operation = "storage.mongodb.Statistic"
 
 	var stat storage.Statistic
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 
 	// Получаем общее количество заявок.
 	c, err := collection.CountDocuments(ctx, bson.D{})

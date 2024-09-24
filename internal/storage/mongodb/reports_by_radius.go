@@ -18,7 +18,7 @@ func (s *Storage) ReportsByRadius(ctx context.Context, r int, p storage.Geo, sta
 	const operation = "storage.mongodb.ReportsByRadius"
 
 	var reports []storage.Report
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 
 	// Меняем местами широту и долготу, затем формируем GeoJSON.
 	p.Coordinates[0], p.Coordinates[1] = p.Coordinates[1], p.Coordinates[0]

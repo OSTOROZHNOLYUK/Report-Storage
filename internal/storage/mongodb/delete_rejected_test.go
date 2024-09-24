@@ -9,8 +9,8 @@ import (
 func TestStorage_DeleteRejected(t *testing.T) {
 
 	// Создаем пул подключений.
-	dbName = "goUnitTestDB"
-	colName = "goUnitTestCollection"
+	dbName = testDatabase
+	colReport = testCollection
 	opts := setOpts(path, "admin", os.Getenv("MONGO_DB_PASSWD"))
 	st, err := new(opts)
 	if err != nil {
@@ -19,7 +19,7 @@ func TestStorage_DeleteRejected(t *testing.T) {
 	defer st.Close()
 
 	// Очищаем тестовую коллекцию.
-	err = st.trun()
+	err = st.trun(colReport)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -28,7 +28,7 @@ func (s *Storage) ReportByID(ctx context.Context, id string) (storage.Report, er
 		return report, fmt.Errorf("%s: %w", operation, storage.ErrIncorrectID)
 	}
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "_id", Value: obj}}
 	err = collection.FindOne(ctx, filter).Decode(&report)
 	if err != nil {

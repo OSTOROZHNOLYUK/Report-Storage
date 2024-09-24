@@ -13,6 +13,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	testDatabase   = "unitTestDB"
+	testCollection = "unitTestCollection"
+	testCounter    = "unitTestCounter"
+)
+
 // path - адрес БД для юнит-тестов.
 var path string = "mongodb://194.54.157.224:10501/"
 
@@ -53,7 +59,7 @@ func (s *Storage) addOne(rep storage.Report) (string, error) {
 	rep.Geo.Type = "Point"
 	rep.Geo.Coordinates[0], rep.Geo.Coordinates[1] = rep.Geo.Coordinates[1], rep.Geo.Coordinates[0]
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(testDatabase).Collection(testCollection)
 	res, err := collection.InsertOne(context.Background(), rep)
 	if err != nil {
 		return "", err
@@ -66,7 +72,7 @@ func (s *Storage) addOne(rep storage.Report) (string, error) {
 func (s *Storage) getOne(id string) (storage.Report, error) {
 
 	var report storage.Report
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(testDatabase).Collection(testCollection)
 
 	obj, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -81,8 +87,9 @@ func (s *Storage) getOne(id string) (storage.Report, error) {
 }
 
 // trun удаляет все записи в колекции. Функция для использования в тестах.
-func (s *Storage) trun() error {
-	collection := s.db.Database(dbName).Collection(colName)
+func (s *Storage) trun(name string) error {
+	collection := s.db.Database(dbName).Collection(name)
+	// err := collection.Drop(context.Background())
 	_, err := collection.DeleteMany(context.Background(), bson.D{})
 	return err
 }

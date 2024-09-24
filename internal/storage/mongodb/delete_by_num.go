@@ -18,7 +18,7 @@ func (s *Storage) DeleteByNum(ctx context.Context, num int) error {
 		return fmt.Errorf("%s: %w", operation, storage.ErrIncorrectNum)
 	}
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "number", Value: num}}
 	res, err := collection.DeleteOne(ctx, filter)
 	if err != nil {

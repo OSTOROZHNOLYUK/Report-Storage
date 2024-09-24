@@ -21,7 +21,7 @@ func (s *Storage) ReportByNum(ctx context.Context, num int) (storage.Report, err
 		return report, fmt.Errorf("%s: %w", operation, storage.ErrIncorrectNum)
 	}
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "number", Value: num}}
 	err := collection.FindOne(ctx, filter).Decode(&report)
 	if err != nil {

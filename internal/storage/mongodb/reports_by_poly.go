@@ -18,7 +18,7 @@ func (s *Storage) ReportsByPoly(ctx context.Context, poly [][2]float64, status [
 	const operation = "storage.mongodb.ReportsByPoly"
 
 	var reports []storage.Report
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 
 	// Меняем местами широту и долготу.
 	for k := range poly {

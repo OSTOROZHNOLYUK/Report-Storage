@@ -34,7 +34,7 @@ func (s *Storage) UpdateReport(ctx context.Context, rep storage.Report) (storage
 
 	rep.Updated = time.Now()
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "number", Value: rep.Number}}
 
 	err := collection.FindOneAndReplace(ctx, filter, rep).Decode(&origin)

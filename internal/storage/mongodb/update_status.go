@@ -28,7 +28,7 @@ func (s *Storage) UpdateStatus(ctx context.Context, num int, status storage.Stat
 		return report, fmt.Errorf("%s: %w", operation, storage.ErrIncorrectStatus)
 	}
 
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "number", Value: num}}
 
 	update := bson.D{

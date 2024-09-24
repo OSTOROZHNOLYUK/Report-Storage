@@ -17,7 +17,7 @@ func (s *Storage) Reports(ctx context.Context, status []storage.Status) ([]stora
 	const operation = "storage.mongodb.Reports"
 
 	var reports []storage.Report
-	collection := s.db.Database(dbName).Collection(colName)
+	collection := s.db.Database(dbName).Collection(colReport)
 
 	// Задаем фильтр по статусам, если они переданы.
 	filter := bson.D{}
