@@ -112,7 +112,7 @@ func TestStorage_ReportsByRadius(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := st.ReportsByRadius(context.Background(), tt.args.radius, tt.args.point, tt.args.status)
+			got, err := st.GetReportsByRadius(context.Background(), tt.args.radius, tt.args.point, tt.args.status)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Storage.ReportsByRadius() error = %v, wantErr %v", err, tt.wantErr)
 				return

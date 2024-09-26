@@ -14,7 +14,7 @@ import (
 // storage.Geo, где поле Type должно иметь значение "Point". Не проверяет
 // принимаемые аргументы, ожидает полностью валидные значения. Если заявки
 // не найдены, то вернет ошибку ErrArrayNotFound.
-func (s *Storage) ReportsByRadius(ctx context.Context, r int, p storage.Geo, status []storage.Status) ([]storage.Report, error) {
+func (s *Storage) GetReportsByRadius(ctx context.Context, r int, p storage.Geo, status []storage.Status) ([]storage.Report, error) {
 	const operation = "storage.mongodb.ReportsByRadius"
 
 	var reports []storage.Report

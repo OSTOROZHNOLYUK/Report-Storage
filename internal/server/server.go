@@ -56,9 +56,11 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
 	s.mux.Get("/api/reports/{num}", api.ReportByNum(log, st))         // получение заявки по ее уникальному номеру
 	s.mux.Get("/api/reports/filter", api.ReportsWithFilters(log, st)) // получение N заявок с фильтрами
 	s.mux.Get("api/reports/id/{id}", api.GetReportByID(log, st))      // получение заявки по ObjectID
+	s.mux.Get("/api/reports/radius", api.ReportsByRadius(log, st))    // получение всех заявок в радиусе от заданной точки
+
 }
 
-// Shutdown останавливает сервер используя graceful shutdown.
+// Shutdown останавливает сервер используя graceful shutdown
 func (s *Server) Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
