@@ -53,6 +53,7 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
 	s.mux.Post("/api/reports/new", api.AddReport(log, st))
 
 	s.mux.Get("/api/reports/all", api.Reports(log, st))
+	s.mux.Get("/api/reports/{num}", api.ReportByNum(log, st))
 }
 
 // Shutdown останавливает сервер используя graceful shutdown.
