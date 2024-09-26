@@ -53,8 +53,9 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
 	s.mux.Post("/api/reports/new", api.AddReport(log, st))
 
 	s.mux.Get("/api/reports/all", api.Reports(log, st))
-	s.mux.Get("/api/reports/{num}", api.ReportByNum(log, st))
+	s.mux.Get("/api/reports/{num}", api.ReportByNum(log, st))         // получение заявки по ее уникальному номеру
 	s.mux.Get("/api/reports/filter", api.ReportsWithFilters(log, st)) // получение N заявок с фильтрами
+	s.mux.Get("api/reports/id/{id}", api.GetReportByID(log, st))      // получение заявки по ObjectID
 }
 
 // Shutdown останавливает сервер используя graceful shutdown.
