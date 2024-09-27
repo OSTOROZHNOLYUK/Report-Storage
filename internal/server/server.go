@@ -57,6 +57,7 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
 	s.mux.Get("/api/reports/filter", api.ReportsWithFilters(log, st)) // получение N заявок с фильтрами
 	s.mux.Get("api/reports/id/{id}", api.GetReportByID(log, st))      // получение заявки по ObjectID
 	s.mux.Get("/api/reports/radius", api.ReportsByRadius(log, st))    // получение всех заявок в радиусе от заданной точки
+	s.mux.Get("/api/reports/quad", api.ReportsByPoly(log, st))        // получение заявок в границах многоугольника
 
 }
 
