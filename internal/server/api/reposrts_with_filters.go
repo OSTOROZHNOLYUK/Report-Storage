@@ -38,8 +38,9 @@ func ReportsWithFilters(l *slog.Logger, st ReportsFilterer) http.HandlerFunc {
 			var err error
 			n, err = strconv.Atoi(nStr)
 			if err != nil || n < 1 {
-				http.Error(w, "invalid parameter n", http.StatusBadRequest)
-				return
+				log.Warn("Invalid parameter n, using default value", slog.Int("default_n", n))
+				// Если параметр некорректен, используем значение по умолчанию
+				n = 20
 			}
 		}
 
@@ -49,8 +50,9 @@ func ReportsWithFilters(l *slog.Logger, st ReportsFilterer) http.HandlerFunc {
 			var err error
 			sort, err = strconv.Atoi(sortStr)
 			if err != nil || (sort != 1 && sort != -1) {
-				http.Error(w, "invalid parameter sort", http.StatusBadRequest)
-				return
+				log.Warn("Invalid parameter sort, using default value", slog.Int("default_sort", sort))
+				// Если параметр некорректен, используем значение по умолчанию
+				sort = -1
 			}
 		}
 

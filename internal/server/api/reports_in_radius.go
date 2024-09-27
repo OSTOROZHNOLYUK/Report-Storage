@@ -17,14 +17,14 @@ import (
 //}
 
 type ReportsByRadiusHandler interface {
-	GetReportsByRadius(ctx context.Context, r int, p storage.Geo, status []storage.Status) ([]storage.Report, error)
+	ReportsByRadius(ctx context.Context, r int, p storage.Geo, status []storage.Status) ([]storage.Report, error)
 }
 
 func ReportsByRadius(log *slog.Logger, st ReportsByRadiusHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportsInRadius"
 		log := log.With(slog.String("op", operation))
-		log.Info("Начало обработки запроса")
+		log.Info("Start processing the request")
 
 		// Получение параметров запроса
 		xParam := r.URL.Query().Get("x")
@@ -34,30 +34,30 @@ func ReportsByRadius(log *slog.Logger, st ReportsByRadiusHandler) http.HandlerFu
 
 		// Проверка на отсутствие параметров
 		if xParam == "" || yParam == "" || radiusParam == "" {
-			http.Error(w, "Недостаточно параметров", http.StatusBadRequest)
-			log.Error("Недостаточно параметров")
+			http.Error(w, "Insufficient parameters", http.StatusBadRequest)
+			log.Error("Insufficient parameters")
 			return
 		}
 
 		// Преобразование координат и радиуса в нужный формат
 		x, err := strconv.ParseFloat(xParam, 64)
 		if err != nil {
-			http.Error(w, "Неверный формат параметра x", http.StatusBadRequest)
-			log.Error("Неверный формат параметра x", slog.String("error", err.Error()))
+			http.Error(w, "Invalid parameter x format", http.StatusBadRequest)
+			log.Error("Invalid parameter x format", slog.String("error", err.Error()))
 			return
 		}
 
 		y, err := strconv.ParseFloat(yParam, 64)
 		if err != nil {
-			http.Error(w, "Неверный формат параметра y", http.StatusBadRequest)
-			log.Error("Неверный формат параметра y", slog.String("error", err.Error()))
+			http.Error(w, "Invalid parameter y format", http.StatusBadRequest)
+			log.Error("Invalid parameter y format", slog.String("error", err.Error()))
 			return
 		}
 
 		radius, err := strconv.Atoi(radiusParam)
 		if err != nil {
-			http.Error(w, "Неверный формат параметра radius", http.StatusBadRequest)
-			log.Error("Неверный формат параметра radius", slog.String("error", err.Error()))
+			http.Error(w, "Invalid parameter radius format", http.StatusBadRequest)
+			log.Error("Invalid parameter radius format", slog.String("error", err.Error()))
 			return
 		}
 
@@ -65,29 +65,29 @@ func ReportsByRadius(log *slog.Logger, st ReportsByRadiusHandler) http.HandlerFu
 		statuses, err := parseStatuses(statusesParam)
 		if err != nil {
 			// обработка ошибки
-			fmt.Println("Ошибка преобразования статусов:", err)
+			fmt.Println("Status conversion error:", err)
 			return
 		}
 		// Вызов метода для получения заявок
 
 		position := storage.Geo{Type: "Point",
 			Coordinates: [2]float64{x, y}}
-		reports, err := st.GetReportsByRadius(r.Context(), radius, position, statuses)
+		reports, err := st.ReportsByRadius(r.Context(), radius, position, statuses)
 		if err != nil {
-			http.Error(w, "Ошибка при получении заявок: "+err.Error(), http.StatusInternalServerError)
-			log.Error("Ошибка при получении заявок", slog.String("error", err.Error()))
+			http.Error(w, "Error when receiving requests: "+err.Error(), http.StatusInternalServerError)
+			log.Error("Error when receiving requests:", slog.String("error", err.Error()))
 			return
 		}
 
 		// Кодирование ответа
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(reports); err != nil {
-			http.Error(w, "Ошибка при кодировании ответа: "+err.Error(), http.StatusInternalServerError)
-			log.Error("Ошибка при кодировании ответа", slog.String("error", err.Error()))
+			http.Error(w, "Error encoding response: "+err.Error(), http.StatusInternalServerError)
+			log.Error("Error encoding response:", slog.String("error", err.Error()))
 			return
 		}
 
-		log.Info("Обработка запроса завершена успешно")
+		log.Info("Request processing completed successfully")
 	}
 }
 
