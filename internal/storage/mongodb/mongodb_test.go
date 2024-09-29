@@ -26,6 +26,7 @@ var path string = "mongodb://194.54.157.224:10501/"
 var reports = []storage.Report{
 	{
 		Number:      1,
+		City:        "Москва",
 		Address:     "Адрес 1",
 		Description: "Описание заявки 1",
 		Contacts:    storage.Contacts{Email: "bob@gmail.com", Telegram: "@bob"},
@@ -34,6 +35,7 @@ var reports = []storage.Report{
 	},
 	{
 		Number:      2,
+		City:        "Москва",
 		Address:     "Адрес 2",
 		Description: "Описание заявки 2",
 		Contacts:    storage.Contacts{Email: "bill@gmail.com", Whatsapp: "+71234567890"},
@@ -42,6 +44,7 @@ var reports = []storage.Report{
 	},
 	{
 		Number:      3,
+		City:        "Москва",
 		Address:     "Адрес 3",
 		Description: "Описание заявки 3",
 		Media:       []string{"https://google.com"},
