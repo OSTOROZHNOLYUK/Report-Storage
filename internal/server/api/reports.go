@@ -8,6 +8,8 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // Reporter - интерфейс для БД в обработчике Reports.
@@ -23,7 +25,10 @@ func Reports(l *slog.Logger, st Reporter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.Reports"
 
-		log := l.With(slog.String("op", operation))
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
 		log.Info("request to receive all reports with status")
 
 		// Установка типа контента для ответа

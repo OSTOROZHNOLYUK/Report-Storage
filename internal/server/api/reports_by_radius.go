@@ -10,6 +10,8 @@ import (
 
 	"Report-Storage/internal/logger"
 	"Report-Storage/internal/storage"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ReportsByRadiusHandler - интерфейс для получения заявок в радиусе от точки.
@@ -22,7 +24,10 @@ func ReportsByRadius(l *slog.Logger, st ReportsByRadiusHandler) http.HandlerFunc
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportsInRadius"
 
-		log := l.With(slog.String("op", operation))
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
 		log.Info("request to receive reports by radius")
 
 		// Установка типа контента для ответа

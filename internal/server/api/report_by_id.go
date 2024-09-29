@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ReportRetriever - интерфейс для получения заявки по ObjectID
@@ -23,7 +24,10 @@ func ReportByID(l *slog.Logger, st ReportRetriever) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportByID"
 
-		log := l.With(slog.String("op", operation))
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
 		log.Info("request to receive report by objectid")
 
 		// Установка типа контента для ответа

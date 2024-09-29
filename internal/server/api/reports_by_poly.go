@@ -8,6 +8,8 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ReportsByPolyHandler - интерфейс для получения заявок в границах многоугольника.
@@ -20,7 +22,10 @@ func ReportsByPoly(l *slog.Logger, st ReportsByPolyHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportsByPoly"
 
-		log := l.With(slog.String("op", operation))
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
 		log.Info("request to receive reports by polygon")
 
 		// Установка типа контента для ответа

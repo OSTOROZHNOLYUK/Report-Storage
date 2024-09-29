@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ReportGetter - интерфейс для доступа к заявке по её номеру.
@@ -23,7 +24,10 @@ func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportByNum"
 
-		log := l.With(slog.String("op", operation))
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
 		log.Info("request to receive report by num")
 
 		// Установка типа контента для ответа

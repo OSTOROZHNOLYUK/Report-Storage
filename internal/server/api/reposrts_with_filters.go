@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ReportsFilterer - интерфейс для получения заявок с фильтром.
@@ -21,7 +23,10 @@ func ReportsWithFilters(l *slog.Logger, st ReportsFilterer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportsWithFilters"
 
-		log := l.With(slog.String("op", operation))
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
 		log.Info("request to receive filtered report list")
 
 		// Установка типа контента для ответа
