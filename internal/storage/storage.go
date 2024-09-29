@@ -32,17 +32,17 @@ const (
 // Geo - тип данных географических координат точки.
 type Geo struct {
 	// Type - тип объекта, в нашем случае всегда значение "Point".
-	Type string `json:"type" bson:"type"`
+	Type string `json:"type,omitempty" bson:"type"`
 	// Coordinates - координаты, первый элемент - широта, второй элемент - долгота.
-	Coordinates [2]float64 `json:"coordinates" bson:"coordinates"`
+	Coordinates [2]float64 `json:"coordinates" bson:"coordinates" validate:"required,dive,required"`
 }
 
 // Contacts - структура контактов отправителя заявки.
 type Contacts struct {
-	Email    string `json:"email,omitempty" bson:"email,omitempty"`
-	Whatsapp string `json:"whatsapp,omitempty" bson:"whatsapp,omitempty"`
-	Telegram string `json:"telegram,omitempty" bson:"telegram,omitempty"`
-	Phone    string `json:"phone,omitempty" bson:"phone,omitempty"`
+	Email    string `json:"email,omitempty" bson:"email,omitempty" validate:"omitempty,email,max=100"`
+	Whatsapp string `json:"whatsapp,omitempty" bson:"whatsapp,omitempty" validate:"omitempty,max=100"` // e164
+	Telegram string `json:"telegram,omitempty" bson:"telegram,omitempty" validate:"omitempty,max=100"`
+	Phone    string `json:"phone,omitempty" bson:"phone,omitempty" validate:"omitempty,max=100"` // e164
 }
 
 // Report - основная структура заявки о проблеме.
@@ -50,8 +50,7 @@ type Report struct {
 	// ID хранит значение ObjectID, используемое в MongoDB.
 	ID primitive.ObjectID `json:"id" bson:"_id"`
 
-	// Number содержит номер заявки, сгенерированный при ее создании в сервисе
-	// обработки новых заявок.
+	// Number содержит уникальный порядковый номер заявки.
 	Number int64 `json:"number" bson:"number"`
 
 	// Created содержит время создания заявки с БД.
@@ -60,8 +59,10 @@ type Report struct {
 	// Updated содержит время последнего изменения заявки.
 	Updated time.Time `json:"updated" bson:"updated"`
 
-	// Address хранит строковое представление ближайшего адреса. Указывается
-	// клиентом при создании заявки.
+	// City содержит значение города или местности заявки.
+	City string `json:"city" bson:"city"`
+
+	// Address хранит строковое представление ближайшего адреса.
 	Address string `json:"address" bson:"address"`
 
 	// Description содержит описание заявки клиентом в свободной форме.
@@ -70,7 +71,7 @@ type Report struct {
 	// Contacts содержит возможные контакты клиента.
 	Contacts Contacts `json:"contacts,omitempty" bson:"contacts,omitempty"`
 
-	// Media содержит срез ссылок на медиа файлы по заявке.
+	// Media содержит слайс ссылок на медиа файлы по заявке.
 	Media []string `json:"media" bson:"media"`
 
 	// Тип Coordinates хранит географические координаты заявки.

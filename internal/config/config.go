@@ -16,11 +16,18 @@ type Config struct {
 	StoragePath   string `yaml:"storage_path" env-required:"true"`
 	StorageUser   string `yaml:"storage_user" env-default:"admin"`
 	StoragePasswd string `yaml:"storage_passwd" env:"MONGO_DB_PASSWD" env-required:"true"`
+	S3Storage     `yaml:"s3storage"`
 	HTTPServer    `yaml:"http_server"`
 }
+type S3Storage struct {
+	Endpoint  string `yaml:"endpoint" env-default:"s3.ru-1.storage.selcloud.ru"`
+	Bucket    string `yaml:"bucket" env-default:"ostorozhnoluk"`
+	AccessKey string `yaml:"access_key" env:"S3_ACCESS_KEY" env-required:"true"`
+	SecretKey string `yaml:"secret_key" env:"S3_SECRET_KEY" env-required:"true"`
+	Domain    string `yaml:"domain" env-default:"https://49078864-cdaa-43c7-bff7-9dc64dd6bf93.selstorage.ru"`
+}
 type HTTPServer struct {
-	Address string `yaml:"address" env-default:"0.0.0.0:80"`
-	// AddressTLS   string        `yaml:"addressTLS" env-default:"0.0.0.0:443"`
+	Address      string        `yaml:"address" env-default:"0.0.0.0:80"`
 	ReadTimeout  time.Duration `yaml:"read_timeout" env-default:"4s"`
 	WriteTimeout time.Duration `yaml:"write_timeout" env-default:"4s"`
 	IdleTimeout  time.Duration `yaml:"idle_timeout" env-default:"60s"`

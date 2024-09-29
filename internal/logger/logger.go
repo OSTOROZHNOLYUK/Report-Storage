@@ -50,6 +50,9 @@ func SetupDiscard() *slog.Logger {
 
 // Err - обертка для ошибки, представляет ее как атрибут слоггера.
 func Err(err error) slog.Attr {
+	if err == nil {
+		return slog.Attr{}
+	}
 	return slog.Attr{
 		Key:   "error",
 		Value: slog.StringValue(err.Error()),
