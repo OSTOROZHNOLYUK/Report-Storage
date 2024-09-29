@@ -9,26 +9,37 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Reports возвращает заявки из БД отсортированными по номеру в убывающем
-// порядке. Вторым параметром принимает слайс статусов и возвращает все
-// заявки с указанными статусами. Если передать nil или пустой слайс, то
-// вернет все заявки. Если заявки не найдены, то вернет ошибку ErrArrayNotFound.
-func (s *Storage) Reports(ctx context.Context, status []storage.Status) ([]storage.Report, error) {
-	const operation = "storage.mongodb.Reports"
+// ReportsWithFilter возвращает заявки в соответствии с переданными параметрами
+// фильтра. Если параметр фильтра не задан или имеет некорректное значение, то
+// используется значение по-умолчанию. Если заявки не найдены, то вернет ошибку
+// ErrArrayNotFound.
+func (s *Storage) ReportsWithFilter(ctx context.Context, fl storage.Filter) ([]storage.Report, error) {
+	const operation = "storage.mongodb.ReportsWithFilter"
 
 	var reports []storage.Report
 	collection := s.db.Database(dbName).Collection(colReport)
 
 	// Задаем фильтр по статусам, если они переданы.
 	filter := bson.D{}
-	if len(status) > 0 {
+	if len(fl.Status) > 0 {
 		filter = bson.D{
-			{Key: "status", Value: bson.M{"$in": status}},
+			{Key: "status", Value: bson.M{"$in": fl.Status}},
 		}
 	}
 
-	// Устанавливаем сортировку по полю number в убывающем порядке.
-	opts := options.Find().SetSort(bson.D{{Key: "number", Value: -1}})
+	// Задаем порядок сортировки. По-умолчанию -1, нисходящий.
+	sort := -1
+	if fl.Sort == 1 {
+		sort = 1
+	}
+	opts := options.Find().SetSort(bson.D{{Key: "number", Value: sort}})
+
+	// Задаем количество. По-умолчанию 20.
+	lim := 20
+	if fl.Count > 0 {
+		lim = fl.Count
+	}
+	opts.SetLimit(int64(lim))
 
 	// Получаем все заявки из БД.
 	cursor, err := collection.Find(ctx, filter, opts)

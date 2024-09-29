@@ -5,24 +5,47 @@ import (
 	"Report-Storage/internal/storage"
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
+// Reporter - интерфейс для БД в обработчике Reports.
 type Reporter interface {
-	Reports(ctx context.Context) ([]storage.Report, error)
+	Reports(ctx context.Context, status []storage.Status) ([]storage.Report, error)
 }
 
-func Reports(log *slog.Logger, st Reporter) http.HandlerFunc {
+// Reports обрабатывает запрос на получение всех заявок с возможностью
+// фильтрации по статусам. Статусы принимаются query параметром status
+// со значениями с виде чисел через запятую. Числа соответствуют
+// константам из пакета storage.
+func Reports(l *slog.Logger, st Reporter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.Reports"
 
-		log.Info("new request to receive all reports")
+		log := l.With(
+			slog.String("op", operation),
+			slog.String("request_id", middleware.GetReqID(r.Context())),
+		)
+		log.Info("request to receive all reports with status")
+
+		// Установка типа контента для ответа
+		w.Header().Set("Content-Type", "application/json")
+
+		// Получение статусов.
+		s := r.URL.Query().Get("status")
+		status := splitStatus(s)
 
 		ctx := r.Context()
-		reports, err := st.Reports(ctx)
+		reports, err := st.Reports(ctx, status)
 		if err != nil {
-			log.Error("cannot receive all reports from DB", logger.Err(err), slog.String("op", operation))
+			log.Error("cannot receive all reports", logger.Err(err))
+			if errors.Is(err, storage.ErrArrayNotFound) {
+				http.Error(w, "no reports found", http.StatusNotFound)
+				return
+			}
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
@@ -30,11 +53,10 @@ func Reports(log *slog.Logger, st Reporter) http.HandlerFunc {
 
 		err = json.NewEncoder(w).Encode(reports)
 		if err != nil {
-			log.Error("cannot encode reports to ResponseWriter", logger.Err(err), slog.String("op", operation))
+			log.Error("cannot encode reports to ResponseWriter", logger.Err(err))
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-		log.Debug("all reports encoded")
-		w.Header().Set("Content-Type", "application/json")
+		log.Debug("all reports encoded and sent successfully")
 	}
 }

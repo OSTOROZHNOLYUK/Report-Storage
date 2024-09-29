@@ -10,12 +10,19 @@ import (
 )
 
 var (
-	ErrNoData = errors.New("no data")
+	ErrIncorrectNum    = errors.New("incorrect report number")
+	ErrIncorrectID     = errors.New("incorrect report objectid")
+	ErrIncorrectStatus = errors.New("incorrect report status")
+	ErrReportNotFound  = errors.New("report not found")
+	ErrArrayNotFound   = errors.New("reports array not found")
 )
 
-// Целочисленные константы статусов заявки.
+// Status - целочисленное выражение статуса заявки.
+type Status int
+
+// Константы статусов заявки.
 const (
-	Unverified = 1 + iota
+	Unverified Status = 1 + iota
 	Opened
 	InProgress
 	Closed
@@ -24,7 +31,7 @@ const (
 
 // Geo - тип данных географических координат точки.
 type Geo struct {
-	// Type - тип объекта, в нашем случае всегда Point.
+	// Type - тип объекта, в нашем случае всегда значение "Point".
 	Type string `json:"type" bson:"type"`
 	// Coordinates - координаты, первый элемент - широта, второй элемент - долгота.
 	Coordinates [2]float64 `json:"coordinates" bson:"coordinates"`
@@ -71,5 +78,36 @@ type Report struct {
 
 	// Status содержит целочисленную константу, отражающую текущий
 	// статус заявки.
-	Status int `json:"status" bson:"status"`
+	Status Status `json:"status" bson:"status"`
 }
+
+// Filter - структура фильтра для получения заявок.
+type Filter struct {
+	// Count отражает необходимое количество заявок, должно быть > 0.
+	Count int
+	// Sort указывает порядок сортировки по номеру, значение должно
+	// быть 1 для восходящего и -1 для нисходящего порядков.
+	Sort int
+	// Слайс статусов.
+	Status []Status
+}
+
+// Statistic - структура статистики заявок со статусами.
+type Statistic struct {
+	Total, Unverified, Opened, InProgress, Closed, Rejected int
+}
+
+// StatusFromString преобразует строку в тип Status.
+// func StatusFromString(s string) (Status, error) {
+// 	switch s {
+// 	case "pending":
+// 		return StatusPending, nil
+// 	case "active":
+// 		return StatusActive, nil
+// 	case "completed":
+// 		return StatusCompleted, nil
+// 	// обработайте другие случаи
+// 	default:
+// 		return -1, fmt.Errorf("неизвестный статус: %s", s)
+// 	}
+// }

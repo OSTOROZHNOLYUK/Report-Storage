@@ -3,6 +3,7 @@ package mongodb
 
 import (
 	"Report-Storage/internal/config"
+	"Report-Storage/internal/storage"
 	"context"
 	"fmt"
 	"log"
@@ -13,11 +14,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	database          = "reportStorage"
+	reportCollection  = "reports"
+	counterCollection = "counter"
+)
+
 // Название базы и коллекции в БД. Используются переменные вместо констант,
 // так как в тестах им присваиваются другие значения.
 var (
-	dbName  string = "reportStorage"
-	colName string = "reports"
+	dbName     string = database
+	colReport  string = reportCollection
+	colCounter string = counterCollection
 )
 
 // tmConn - таймаут на создание пула подключений.
@@ -30,11 +38,7 @@ type Storage struct {
 
 // New - обертка для конструктора пула подключений new.
 func New(cfg *config.Config) *Storage {
-	// Для запуска на локалхосте без авторизации нужно закомментировать
-	// строчку ниже и раскомментировать под ней.
-	//
 	opts := setOpts(cfg.StoragePath, cfg.StorageUser, cfg.StoragePasswd)
-	// opts := setOptsNoPasswd(cfg.StoragePath)
 	storage, err := new(opts)
 	if err != nil {
 		log.Fatalf("failed to init storage: %s", err.Error())
@@ -51,11 +55,6 @@ func setOpts(path, user, password string) *options.ClientOptions {
 	}
 	opts := options.Client().ApplyURI(path).SetAuth(credential)
 	return opts
-}
-
-// setOptsNoPasswd возвращает опции нового подключения без авторизации.
-func setOptsNoPasswd(path string) *options.ClientOptions {
-	return options.Client().ApplyURI(path)
 }
 
 // new - конструктор пула подключений к БД.
@@ -77,7 +76,7 @@ func new(opts *options.ClientOptions) (*Storage, error) {
 	// Создаем уникальный индекс по полю number, чтобы избежать
 	// дублирования значений. И геопространственный индекс для работы
 	// с координатами.
-	collection := db.Database(dbName).Collection(colName)
+	collection := db.Database(dbName).Collection(colReport)
 	indexUniq := mongo.IndexModel{
 		Keys:    bson.D{{Key: "number", Value: -1}},
 		Options: options.Index().SetUnique(true),
@@ -96,4 +95,13 @@ func new(opts *options.ClientOptions) (*Storage, error) {
 // Close - обертка для закрытия пула подключений.
 func (s *Storage) Close() error {
 	return s.db.Disconnect(context.Background())
+}
+
+// checkStatus проверяет аргумент status на соответствие константам
+// из пакета storage.
+func checkStatus(status storage.Status) bool {
+	if status > 0 && status < 6 {
+		return true
+	}
+	return false
 }
