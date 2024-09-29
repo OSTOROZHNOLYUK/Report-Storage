@@ -69,11 +69,11 @@ func ReportsWithFilters(l *slog.Logger, st ReportsFilterer) http.HandlerFunc {
 		ctx := r.Context()
 		reports, err := st.ReportsWithFilter(ctx, filter)
 		if err != nil {
+			log.Error("failed to get reports with filter", logger.Err(err))
 			if errors.Is(err, storage.ErrArrayNotFound) {
 				http.Error(w, "no reports found", http.StatusNotFound)
 				return
 			}
-			log.Error("failed to get reports with filter", logger.Err(err))
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
@@ -84,6 +84,6 @@ func ReportsWithFilters(l *slog.Logger, st ReportsFilterer) http.HandlerFunc {
 			http.Error(w, "failed to encode reports", http.StatusInternalServerError)
 			return
 		}
-		log.Debug("filtered reports encoded and sent")
+		log.Debug("filtered reports encoded and sent successfully")
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"Report-Storage/internal/storage"
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 )
@@ -22,20 +23,24 @@ func Reports(l *slog.Logger, st Reporter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.Reports"
 
-		log := l.With(
-			slog.String("op", operation),
-		)
+		log := l.With(slog.String("op", operation))
 		log.Info("request to receive all reports with status")
 
+		// Установка типа контента для ответа
 		w.Header().Set("Content-Type", "application/json")
 
+		// Получение статусов.
 		s := r.URL.Query().Get("status")
 		status := splitStatus(s)
 
 		ctx := r.Context()
 		reports, err := st.Reports(ctx, status)
 		if err != nil {
-			log.Error("cannot receive all reports from DB", logger.Err(err))
+			log.Error("cannot receive all reports", logger.Err(err))
+			if errors.Is(err, storage.ErrArrayNotFound) {
+				http.Error(w, "no reports found", http.StatusNotFound)
+				return
+			}
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
@@ -47,7 +52,6 @@ func Reports(l *slog.Logger, st Reporter) http.HandlerFunc {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-		log.Debug("all reports encoded")
-		w.WriteHeader(http.StatusOK)
+		log.Debug("all reports encoded and sent successfully")
 	}
 }

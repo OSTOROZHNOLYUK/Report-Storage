@@ -4,7 +4,6 @@ package storage
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,9 +27,6 @@ const (
 	InProgress
 	Closed
 	Rejected
-	StatusPending
-	StatusActive
-	StatusCompleted
 )
 
 // Geo - тип данных географических координат точки.
@@ -102,16 +98,16 @@ type Statistic struct {
 }
 
 // StatusFromString преобразует строку в тип Status.
-func StatusFromString(s string) (Status, error) {
-	switch s {
-	case "pending":
-		return StatusPending, nil
-	case "active":
-		return StatusActive, nil
-	case "completed":
-		return StatusCompleted, nil
-	// обработайте другие случаи
-	default:
-		return -1, fmt.Errorf("неизвестный статус: %s", s)
-	}
-}
+// func StatusFromString(s string) (Status, error) {
+// 	switch s {
+// 	case "pending":
+// 		return StatusPending, nil
+// 	case "active":
+// 		return StatusActive, nil
+// 	case "completed":
+// 		return StatusCompleted, nil
+// 	// обработайте другие случаи
+// 	default:
+// 		return -1, fmt.Errorf("неизвестный статус: %s", s)
+// 	}
+// }

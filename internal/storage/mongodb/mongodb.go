@@ -51,7 +51,7 @@ func setOpts(path, user, password string) *options.ClientOptions {
 		AuthMechanism: "SCRAM-SHA-256",
 		AuthSource:    "admin",
 		Username:      user,
-		Password:      password,
+		Password:      "monzo1234",
 	}
 	opts := options.Client().ApplyURI(path).SetAuth(credential)
 	return opts

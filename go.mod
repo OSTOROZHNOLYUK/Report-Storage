@@ -12,7 +12,6 @@ require (
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/go-chi/chi v1.5.5
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect

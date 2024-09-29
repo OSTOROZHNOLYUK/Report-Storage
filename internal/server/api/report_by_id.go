@@ -6,46 +6,49 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
 
-// ReportGetter - интерфейс для доступа к заявке по её номеру.
-type ReportGetter interface {
-	ReportByNum(context.Context, int) (storage.Report, error)
+// ReportRetriever - интерфейс для получения заявки по ObjectID
+type ReportRetriever interface {
+	ReportByID(ctx context.Context, id string) (storage.Report, error)
 }
 
-// ReportByNum обрабатывает запрос на получение заявки по её номеру.
-func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
+// ReportByID обрабатывает запрос на получение заявки по ObjectID.
+func ReportByID(l *slog.Logger, st ReportRetriever) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const operation = "server.api.ReportByNum"
+		const operation = "server.api.ReportByID"
 
 		log := l.With(slog.String("op", operation))
-		log.Info("request to receive report by num")
+		log.Info("request to receive report by objectid")
 
 		// Установка типа контента для ответа
 		w.Header().Set("Content-Type", "application/json")
 
-		numStr := chi.URLParam(r, "num")
-		num, err := strconv.Atoi(numStr)
-		if err != nil || num < 1 {
-			log.Error("invalid report number", logger.Err(err))
-			http.Error(w, "invalid report number", http.StatusBadRequest)
+		id := chi.URLParam(r, "id")
+		fmt.Println(id)
+		if id == "" {
+			log.Error("empty id value")
+			http.Error(w, "missing id", http.StatusBadRequest)
 			return
 		}
 
-		ctx := r.Context()
-		report, err := st.ReportByNum(ctx, num)
+		report, err := st.ReportByID(r.Context(), id)
 		if err != nil {
 			log.Error("cannot find report", logger.Err(err))
+			if errors.Is(err, storage.ErrIncorrectID) {
+				http.Error(w, "invalid objectid", http.StatusBadRequest)
+				return
+			}
 			if errors.Is(err, storage.ErrReportNotFound) {
 				http.Error(w, "report not found", http.StatusNotFound)
 				return
 			}
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 

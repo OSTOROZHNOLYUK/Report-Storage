@@ -21,6 +21,7 @@ func main() {
 
 	// Инициализируем и запускаем HTTP сервер.
 	srv := server.New(cfg)
+	srv.Middleware()
 	srv.API(log, st)
 	srv.Start()
 	log.Info("Server started")

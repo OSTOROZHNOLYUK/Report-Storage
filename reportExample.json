@@ -1,0 +1,20 @@
+{
+    "id": "66f90ce180f2bec8de73a174",
+    "number": 1,
+    "created": "2024-09-29T08:16:33.588Z",
+    "updated": "2024-09-29T08:16:33.588Z",
+    "address": "Красная пл. 3",
+    "description": "",
+    "contacts": {},
+    "media": [
+        "https://google.com"
+    ],
+    "geo": {
+        "type": "Point",
+        "coordinates": [
+            37.62026781374883,
+            55.75388130172051
+        ]
+    },
+    "status": 1
+}
