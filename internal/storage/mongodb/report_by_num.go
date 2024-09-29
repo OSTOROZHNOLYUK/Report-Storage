@@ -31,5 +31,8 @@ func (s *Storage) ReportByNum(ctx context.Context, num int) (storage.Report, err
 		return report, fmt.Errorf("%s: %w", operation, err)
 	}
 
+	// Меняем местами долготу и широту.
+	report.Geo.Coordinates[0], report.Geo.Coordinates[1] = report.Geo.Coordinates[1], report.Geo.Coordinates[0]
+
 	return report, nil
 }

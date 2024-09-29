@@ -37,7 +37,7 @@ func ReportByID(l *slog.Logger, st ReportRetriever) http.HandlerFunc {
 		fmt.Println(id)
 		if id == "" {
 			log.Error("empty id value")
-			http.Error(w, "missing id", http.StatusBadRequest)
+			http.Error(w, "invalid report objectid", http.StatusBadRequest)
 			return
 		}
 
@@ -45,21 +45,21 @@ func ReportByID(l *slog.Logger, st ReportRetriever) http.HandlerFunc {
 		if err != nil {
 			log.Error("cannot find report", logger.Err(err))
 			if errors.Is(err, storage.ErrIncorrectID) {
-				http.Error(w, "invalid objectid", http.StatusBadRequest)
+				http.Error(w, "invalid report objectid", http.StatusBadRequest)
 				return
 			}
 			if errors.Is(err, storage.ErrReportNotFound) {
 				http.Error(w, "report not found", http.StatusNotFound)
 				return
 			}
-			http.Error(w, "internal server error", http.StatusInternalServerError)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 
 		err = json.NewEncoder(w).Encode(report)
 		if err != nil {
 			log.Error("cannot encode report", logger.Err(err))
-			http.Error(w, "failed to encode report", http.StatusInternalServerError)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 

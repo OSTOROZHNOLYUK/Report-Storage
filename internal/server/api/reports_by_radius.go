@@ -99,7 +99,7 @@ func ReportsByRadius(l *slog.Logger, st ReportsByRadiusHandler) http.HandlerFunc
 		err = json.NewEncoder(w).Encode(reports)
 		if err != nil {
 			log.Error("cannot encode reports to ResponseWriter", logger.Err(err))
-			http.Error(w, "failed to encode reports", http.StatusInternalServerError)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 		log.Debug("reports by radius encoded and sent successfully")

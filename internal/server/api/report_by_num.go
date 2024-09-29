@@ -56,7 +56,7 @@ func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
 		err = json.NewEncoder(w).Encode(report)
 		if err != nil {
 			log.Error("cannot encode report", logger.Err(err))
-			http.Error(w, "failed to encode report", http.StatusInternalServerError)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 

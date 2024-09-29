@@ -86,7 +86,7 @@ func ReportsWithFilters(l *slog.Logger, st ReportsFilterer) http.HandlerFunc {
 		err = json.NewEncoder(w).Encode(reports)
 		if err != nil {
 			log.Error("cannot encode reports to ResponseWriter", logger.Err(err))
-			http.Error(w, "failed to encode reports", http.StatusInternalServerError)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 		log.Debug("filtered reports encoded and sent successfully")

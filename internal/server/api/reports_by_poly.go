@@ -64,7 +64,7 @@ func ReportsByPoly(l *slog.Logger, st ReportsByPolyHandler) http.HandlerFunc {
 		// Кодируем результаты в JSON и отправляем ответ.
 		if err := json.NewEncoder(w).Encode(reports); err != nil {
 			log.Error("cannot encode reports to ResponseWriter", logger.Err(err))
-			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 		log.Debug("reports by polygon encoded and sent successfully")
