@@ -65,6 +65,7 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage, s3 *s3cloud.FileStor
 // Middleware инициализирует все обработчики middleware.
 func (s *Server) Middleware() {
 	s.mux.Use(middleware.RequestID)
+	s.mux.Use(middleware.RealIP)
 	s.mux.Use(middleware.Logger)
 	s.mux.Use(middleware.Recoverer)
 }

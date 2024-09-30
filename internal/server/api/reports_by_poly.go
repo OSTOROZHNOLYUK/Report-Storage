@@ -44,6 +44,13 @@ func ReportsByPoly(l *slog.Logger, st ReportsByPolyHandler) http.HandlerFunc {
 			return
 		}
 
+		// Проверка количества вершин многоугольника.
+		if len(input.Quad) < 3 {
+			log.Error("vertex count les than three")
+			http.Error(w, "invalid JSON", http.StatusBadRequest)
+			return
+		}
+
 		// Получение статусов.
 		statusParam := r.URL.Query().Get("status")
 		status := splitStatus(statusParam)

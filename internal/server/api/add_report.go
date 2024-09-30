@@ -33,7 +33,7 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 		ct := strings.ToLower(r.Header.Get("Content-Type"))
 		if !strings.Contains(ct, "multipart/form-data") {
 			log.Error("content-type is not multipart/form-data", slog.String("Content-Type", ct))
-			http.Error(w, "incorrect content-type", http.StatusBadRequest)
+			http.Error(w, "unsupported media type", http.StatusUnsupportedMediaType)
 			return
 		}
 
