@@ -5,6 +5,7 @@ import (
 	"Report-Storage/internal/reports"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -40,6 +41,12 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 		// Суммарный размер всех загружаемых файлов не более 30 Мб.
 		r.Body = http.MaxBytesReader(w, r.Body, maxMemory)
 		r.ParseMultipartForm(maxMemory + 512)
+		defer func() {
+			err := r.MultipartForm.RemoveAll()
+			if err != nil {
+				log.Error("cannot remove temporary multipart form files", logger.Err(err))
+			}
+		}()
 
 		// Проверяем наличие файлов и строковых значений.
 		if len(r.MultipartForm.Value) == 0 {
@@ -67,6 +74,11 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 			http.Error(w, "unsupported media type", http.StatusUnsupportedMediaType)
 			return
 		}
+
+		// TODO: добавить пул для конвертации фото.
+		//
+		// Принудительно возвращаем аллоцированную память системе.
+		defer debug.FreeOSMemory()
 
 		log.Debug("request body parsed succefully")
 
