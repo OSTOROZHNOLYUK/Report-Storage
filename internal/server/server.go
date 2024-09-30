@@ -2,6 +2,7 @@ package server
 
 import (
 	"Report-Storage/internal/config"
+	"Report-Storage/internal/s3cloud"
 	"Report-Storage/internal/server/api"
 	"Report-Storage/internal/storage/mongodb"
 	"context"
@@ -50,8 +51,8 @@ func (s *Server) Start() {
 }
 
 // API инициализирует все обработчики API.
-func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
-	s.mux.Post("/api/reports/new", api.AddReport(log, st))
+func (s *Server) API(log *slog.Logger, st *mongodb.Storage, s3 *s3cloud.FileStorage) {
+	s.mux.Post("/api/reports/new", api.AddReport(log, st, s3))
 
 	s.mux.Post("/api/reports/quad", api.ReportsByPoly(log, st)) // получение заявок в границах многоугольника
 	s.mux.Get("/api/reports/all", api.Reports(log, st))
@@ -64,6 +65,7 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage) {
 // Middleware инициализирует все обработчики middleware.
 func (s *Server) Middleware() {
 	s.mux.Use(middleware.RequestID)
+	s.mux.Use(middleware.RealIP)
 	s.mux.Use(middleware.Logger)
 	s.mux.Use(middleware.Recoverer)
 }

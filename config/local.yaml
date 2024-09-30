@@ -1,9 +1,19 @@
+# Environment
 env: "local" # окружение сервера. Варианты: local, dev, prod
+# MongoDB
 storage_path: "mongodb://192.168.0.102:27017/" # адрес для подключения к MongoDB
 storage_user: "admin" # пользователь для аутентификации в MongoDB
 storage_passwd: "MONGO_DB_PASSWD" # пароль для аутентификации в MongoDB
+# S3 Storage
+s3storage:
+  endpoint: "s3.ru-1.storage.selcloud.ru"
+  bucket: "ostorozhnoluk"
+  access_key: "S3_ACCESS_KEY"
+  secret_key: "S3_SECRET_KEY"
+  domain: "https://49078864-cdaa-43c7-bff7-9dc64dd6bf93.selstorage.ru"
+# Server
 http_server:
   address: "localhost:80"
-  read_timeout: 5s
-  write_timeout: 10s
+  read_timeout: 10s
+  write_timeout: 20s
   idle_timeout: 60s
