@@ -5,7 +5,6 @@ import (
 	"Report-Storage/internal/reports"
 	"Report-Storage/internal/storage"
 	"context"
-
 	"errors"
 	"log/slog"
 	"net/http"
@@ -24,12 +23,10 @@ type ReportUpdater interface {
 func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UpdateReport"
-
 		log := l.With(
 			slog.String("op", operation),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
-
 		numStr := chi.URLParam(r, "num")
 		num, err := strconv.Atoi(numStr)
 		if err != nil {
@@ -37,14 +34,12 @@ func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.H
 			http.Error(w, "invalid report number", http.StatusBadRequest)
 			return
 		}
-
 		var report storage.Report
 		if err := render.Bind(r, &report); err != nil {
 			log.Error("failed to bind JSON", logger.Err(err))
 			http.Error(w, "failed to bind JSON", http.StatusBadRequest)
 			return
 		}
-
 		report.Number = int64(num)
 		origin, err := st.UpdateReport(r.Context(), report)
 		if err != nil {
@@ -56,7 +51,6 @@ func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.H
 			}
 			return
 		}
-
 		render.JSON(w, r, origin)
 	}
 }
