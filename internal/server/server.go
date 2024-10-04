@@ -64,6 +64,7 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage, s3 *s3cloud.FileStor
 	s.mux.Patch("/api/reports/status/{num}", api.UpdateStatusReport(log, st)) //обработчик для изменения статуса заявки
 	s.mux.Delete("/api/reports/{num}", api.DeleteReport(log, st))             //обработчик для удаления заявки по ее номеру
 	s.mux.Delete("/api/reports/rejected", api.DeleteRejected(log, st))        // Обработчик для удаления всех заявок со статусом "Отклонена"
+	s.mux.Get("/api/reports/statistic", api.GetStatistic(log, st))            //Обработчик для получение статистики по всем заявкам.
 
 }
 
