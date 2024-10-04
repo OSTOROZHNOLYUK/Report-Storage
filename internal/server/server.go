@@ -62,6 +62,8 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage, s3 *s3cloud.FileStor
 	s.mux.Get("/api/reports/radius", api.ReportsByRadius(log, st))            // получение всех заявок в радиусе от заданной точки
 	s.mux.Put("/api/reports/{num}", api.UpdateReport(log, st, s3))            // обработчик обновления заявки
 	s.mux.Patch("/api/reports/status/{num}", api.UpdateStatusReport(log, st)) //обработчик для изменения статуса заявки
+	s.mux.Delete("/api/reports/{num}", api.DeleteReport(log, st))             //обработчик для удаления заявки по ее номеру
+
 }
 
 // Middleware инициализирует все обработчики middleware.
