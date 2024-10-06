@@ -3,6 +3,7 @@ package api
 import (
 	"Report-Storage/internal/logger"
 	"Report-Storage/internal/storage"
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -13,13 +14,18 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-// Структура для обновления статуса
-type updateStatusRequest struct {
-	NewStatus storage.Status `json:"new"`
+// // Структура для обновления статуса
+// type updateStatusRequest struct {
+// 	NewStatus storage.Status `json:"new"`
+// }
+
+// ReportStatusUpdater - интерфейс для обновления статуса заявки.
+type ReportStatusUpdater interface {
+	UpdateStatus(ctx context.Context, num int, status storage.Status) (storage.Report, error)
 }
 
 // UpdateStatusReport обрабатывает запрос для изменения статуса заявки.
-func UpdateStatusReport(l *slog.Logger, st ReportGetter) http.HandlerFunc {
+func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UpdateStatusReport"
 
@@ -40,16 +46,29 @@ func UpdateStatusReport(l *slog.Logger, st ReportGetter) http.HandlerFunc {
 			return
 		}
 
-		var req updateStatusRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			log.Error("invalid request body", logger.Err(err))
-			http.Error(w, "invalid request body", http.StatusBadRequest)
+		// Получаем значение нового статуса.
+		s := r.URL.Query().Get("new")
+		if s == "" {
+			log.Error("empty new status")
+			http.Error(w, "incorrect new status", http.StatusBadRequest)
+			return
+		}
+		status := splitStatus(s)[0]
+		if status < 1 || status > 5 {
+			log.Error("incorrect new status", slog.Int("status", int(status)))
+			http.Error(w, "incorrect new status", http.StatusBadRequest)
 			return
 		}
 
+		// var req updateStatusRequest
+		// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		// 	log.Error("invalid request body", logger.Err(err))
+		// 	http.Error(w, "invalid request body", http.StatusBadRequest)
+		// 	return
+		// }
+
 		// Обновляем статус заявки
-		ctx := r.Context()
-		report, err := st.ReportByNum(ctx, num)
+		report, err := st.UpdateStatus(r.Context(), num, status)
 		if err != nil {
 			log.Error("cannot update report status", logger.Err(err))
 			if errors.Is(err, storage.ErrReportNotFound) {

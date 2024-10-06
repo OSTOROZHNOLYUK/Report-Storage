@@ -28,6 +28,8 @@ func DeleteRejected(l *slog.Logger, st RejectRemover) http.HandlerFunc {
 		)
 		log.Info("request to delete rejected reports")
 
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+
 		ctx := r.Context()
 		count, err := st.DeleteRejected(ctx)
 		if err != nil {
@@ -42,7 +44,11 @@ func DeleteRejected(l *slog.Logger, st RejectRemover) http.HandlerFunc {
 		log.Debug("rejected reports deleted succesfully", slog.Int("count", count))
 
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("Deleted rejected reports: " + strconv.Itoa(count)))
-
+		_, err = w.Write([]byte("Deleted rejected reports: " + strconv.Itoa(count)))
+		if err != nil {
+			log.Error("cannot write response", logger.Err(err))
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
 	}
 }

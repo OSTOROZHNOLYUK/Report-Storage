@@ -16,6 +16,7 @@ type Config struct {
 	StoragePath   string `yaml:"storage_path" env-required:"true"`
 	StorageUser   string `yaml:"storage_user" env-default:"admin"`
 	StoragePasswd string `yaml:"storage_passwd" env:"MONGO_DB_PASSWD" env-required:"true"`
+	JwtSecret     string `yaml:"jwt_secret" env:"JWT_SECRET" env-required:"true"`
 	S3Storage     `yaml:"s3storage"`
 	HTTPServer    `yaml:"http_server"`
 }

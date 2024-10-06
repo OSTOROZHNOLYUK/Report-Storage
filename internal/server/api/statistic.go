@@ -17,8 +17,8 @@ type StatisticRetriever interface {
 	Statistic(ctx context.Context) (storage.Statistic, error)
 }
 
-// GetStatistic обрабатывает запрос на получение статистики по всем заявкам.
-func GetStatistic(l *slog.Logger, st StatisticRetriever) http.HandlerFunc {
+// Statistic обрабатывает запрос на получение статистики по всем заявкам.
+func Statistic(l *slog.Logger, st StatisticRetriever) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.GetStatistic"
 

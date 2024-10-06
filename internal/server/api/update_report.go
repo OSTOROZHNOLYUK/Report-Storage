@@ -5,16 +5,19 @@ import (
 	"Report-Storage/internal/reports"
 	"Report-Storage/internal/storage"
 	"context"
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
-	"strconv"
+	"reflect"
+	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 )
 
+// ReportUpdater - интерфейс для обновления всех полей заявки.
 type ReportUpdater interface {
 	UpdateReport(ctx context.Context, rep storage.Report) (storage.Report, error)
 }
@@ -27,30 +30,62 @@ func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.H
 			slog.String("op", operation),
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
-		numStr := chi.URLParam(r, "num")
-		num, err := strconv.Atoi(numStr)
-		if err != nil {
-			log.Error("invalid report number", logger.Err(err))
-			http.Error(w, "invalid report number", http.StatusBadRequest)
-			return
-		}
+
+		// Установка типа контента для ответа
+		w.Header().Set("Content-Type", "application/json")
+
+		// Декодируем тело запроса в структуру.
 		var report storage.Report
-		if err := render.Bind(r, &report); err != nil {
-			log.Error("failed to bind JSON", logger.Err(err))
-			http.Error(w, "failed to bind JSON", http.StatusBadRequest)
+		if err := render.DecodeJSON(r.Body, &report); err != nil {
+			log.Error("failed to decode JSON", logger.Err(err))
+			http.Error(w, "invalid report data", http.StatusBadRequest)
 			return
 		}
-		report.Number = int64(num)
+
+		// Валидируем поля запроса.
+		valid := validator.New()
+		err := valid.Struct(report)
+		if err != nil {
+			validateErr := err.(validator.ValidationErrors)
+			log.Error("validation failed", logger.Err(validateErr))
+			http.Error(w, "invalid report data", http.StatusBadRequest)
+			return
+		}
+		report.Updated = time.Now()
+		report.Geo.Type = "Point"
+		log.Debug("json input decoded and validated successfully")
+
+		// Метод UpdateReport возвращает заявку ДО ее изменения. Это необходимо
+		// для сравнения полей Media и удаления неиспользуемых файлов.
 		origin, err := st.UpdateReport(r.Context(), report)
 		if err != nil {
+			log.Error("failed to update report", logger.Err(err))
 			if errors.Is(err, storage.ErrReportNotFound) {
 				http.Error(w, "report not found", http.StatusNotFound)
-			} else {
-				log.Error("failed to update report", logger.Err(err))
-				http.Error(w, "internal error", http.StatusInternalServerError)
+				return
 			}
+			if errors.Is(err, storage.ErrIncorrectID) {
+				http.Error(w, "invalid report data", http.StatusBadRequest)
+				return
+			}
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-		render.JSON(w, r, origin)
+
+		if !reflect.DeepEqual(report.Media, origin.Media) {
+
+			// TODO: написать алгортм удаления неиспользуемых файлов из объектного
+			//       хранилища.
+			log.Debug("removing files from S3")
+		}
+
+		err = json.NewEncoder(w).Encode(report)
+		if err != nil {
+			log.Error("cannot encode report", logger.Err(err))
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+
+		log.Debug("report sent successfully")
 	}
 }

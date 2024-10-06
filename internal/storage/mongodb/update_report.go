@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -32,7 +31,8 @@ func (s *Storage) UpdateReport(ctx context.Context, rep storage.Report) (storage
 		return origin, fmt.Errorf("%s: %w", operation, storage.ErrIncorrectStatus)
 	}
 
-	rep.Updated = time.Now()
+	// Меняем местами широту и долготу у обновленной заявки.
+	rep.Geo.Coordinates[0], rep.Geo.Coordinates[1] = rep.Geo.Coordinates[1], rep.Geo.Coordinates[0]
 
 	collection := s.db.Database(dbName).Collection(colReport)
 	filter := bson.D{{Key: "number", Value: rep.Number}}
@@ -44,6 +44,9 @@ func (s *Storage) UpdateReport(ctx context.Context, rep storage.Report) (storage
 		}
 		return origin, fmt.Errorf("%s: %w", operation, err)
 	}
+
+	// Меняем местами широту и долготу у заявки до изменения.
+	origin.Geo.Coordinates[0], origin.Geo.Coordinates[1] = origin.Geo.Coordinates[1], origin.Geo.Coordinates[0]
 
 	return origin, nil
 }

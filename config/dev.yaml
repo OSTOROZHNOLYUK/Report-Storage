@@ -4,6 +4,8 @@ env: "dev" # окружение сервера. Варианты: local, dev, pr
 storage_path: "mongodb://194.54.157.224:10501/" # адрес для подключения к MongoDB
 storage_user: "admin" # пользователь для аутентификации в MongoDB
 storage_passwd: "MONGO_DB_PASSWD" # пароль для аутентификации в MongoDB
+# JWT
+jwt_secret: "JWT_SECRET"
 # S3 Storage
 s3storage:
   endpoint: "s3.ru-1.storage.selcloud.ru"
