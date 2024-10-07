@@ -7,9 +7,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
@@ -72,11 +72,17 @@ func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.H
 			return
 		}
 
-		if !reflect.DeepEqual(report.Media, origin.Media) {
-
-			// TODO: написать алгортм удаления неиспользуемых файлов из объектного
-			//       хранилища.
-			log.Debug("removing files from S3")
+		fmt.Println(len(origin.Media))
+		fmt.Println(len(report.Media))
+		// Если в измененной заявке меньше медиа файлов, чем до изменения,
+		// то находим разницу и удаляем неиспользуемые файлы из S3 хранилища.
+		if len(origin.Media) > len(report.Media) {
+			diff := reports.SliceDiff(origin.Media, report.Media)
+			fmt.Println(diff)
+			if len(diff) > 0 {
+				log.Debug("removing media files")
+				go reports.RemoveFiles(log, diff, s3)
+			}
 		}
 
 		err = json.NewEncoder(w).Encode(report)
