@@ -6,15 +6,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
-// ReportRetriever - интерфейс для получения заявки по ObjectID
+// ReportRetriever - интерфейс для получения заявки по ObjectID.
 type ReportRetriever interface {
 	ReportByID(ctx context.Context, id string) (storage.Report, error)
 }
@@ -24,23 +20,22 @@ func ReportByID(l *slog.Logger, st ReportRetriever) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.ReportByID"
 
-		log := l.With(
-			slog.String("op", operation),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
+		// Настройка логирования.
+		log := logger.Handler(l, operation, r)
 		log.Info("request to receive report by objectid")
 
-		// Установка типа контента для ответа
+		// Установка типа контента для ответа.
 		w.Header().Set("Content-Type", "application/json")
 
-		id := chi.URLParam(r, "id")
-		fmt.Println(id)
-		if id == "" {
-			log.Error("empty id value")
-			http.Error(w, "invalid report objectid", http.StatusBadRequest)
+		// Получение параметров запроса.
+		id, err := objectID(r)
+		if err != nil {
+			log.Error("invalid report objectID", logger.Err(err))
+			http.Error(w, "invalid report objectID", http.StatusBadRequest)
 			return
 		}
 
+		// Запрос в базу данных.
 		report, err := st.ReportByID(r.Context(), id)
 		if err != nil {
 			log.Error("cannot find report", logger.Err(err))
@@ -56,13 +51,13 @@ func ReportByID(l *slog.Logger, st ReportRetriever) http.HandlerFunc {
 			return
 		}
 
+		// Кодирование ответа в JSON.
 		err = json.NewEncoder(w).Encode(report)
 		if err != nil {
 			log.Error("cannot encode report", logger.Err(err))
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-
 		log.Debug("report sent successfully")
 	}
 }

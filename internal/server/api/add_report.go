@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 )
 
@@ -24,13 +23,11 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UploadFiles"
 
-		log := l.With(
-			slog.String("op", operation),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
+		// Настройка логирования.
+		log := logger.Handler(l, operation, r)
 		log.Info("request to add new report")
 
-		// Проверяем заголовок Content-Type на значение multipart/form-data.
+		// Проверка заголовка Content-Type на значение multipart/form-data.
 		ct := strings.ToLower(r.Header.Get("Content-Type"))
 		if !strings.Contains(ct, "multipart/form-data") {
 			log.Error("content-type is not multipart/form-data", slog.String("Content-Type", ct))
@@ -48,7 +45,7 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 			}
 		}()
 
-		// Проверяем наличие файлов и строковых значений.
+		// Проверка наличия файлов и строковых значений.
 		if len(r.MultipartForm.Value) == 0 {
 			log.Error("json not found in the request body")
 			http.Error(w, "incorrect report data", http.StatusBadRequest)
@@ -60,8 +57,8 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 			return
 		}
 
-		// Получаем сформированную структуру заявки и возвращаем ошибку,
-		// если code не равно 200.
+		// Получение сформированной структуры заявки и кода. Если code
+		// не равно 200, то возвращаем ошибку.
 		report, code := reports.Build(l, s3, r)
 		switch code {
 		case http.StatusBadRequest:
@@ -77,15 +74,17 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 
 		// TODO: добавить пул для конвертации фото.
 		//
-		// Принудительно возвращаем аллоцированную память системе.
+		// Принудительный возврат аллоцированной памяти системе.
 		defer debug.FreeOSMemory()
 
 		log.Debug("request body parsed succefully")
 
-		// Получаем новый номер заявки и записываем его в структуру заявки.
-		// ObjectID будет сгенерирован в методе БД AddReport. В случае ошибки
-		// удаляем загруженные файлы из S3 хранилища.
+		// Получение контекста запроса.
 		ctx := r.Context()
+
+		// Получение нового номера заявки и запись его в структуру заявки.
+		// ObjectID будет сгенерирован в методе БД AddReport. В случае
+		// ошибки удаляем загруженные файлы из S3 хранилища.
 		newNum, err := st.CounterInc(ctx)
 		if err != nil {
 			go reports.RemoveFiles(l, report.Media, s3)
@@ -95,7 +94,7 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 		}
 		report.Number = int64(newNum)
 
-		// Добавляем сформированную заявку в БД. В случае ошибки удаляем
+		// Добавление сформированной заявки в БД. В случае ошибки удаляем
 		// загруженные файлы из S3 хранилища.
 		err = st.AddReport(ctx, report)
 		if err != nil {
@@ -106,7 +105,9 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 		}
 		log.Debug("new report added successfully")
 
+		// Запись ответа в text/plain и установка кода 201.
 		render.Status(r, http.StatusCreated)
 		render.PlainText(w, r, strconv.Itoa(int(report.Number)))
+		log.Debug("new report number sent successfully")
 	}
 }

@@ -8,16 +8,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
-
-// // Структура для обновления статуса
-// type updateStatusRequest struct {
-// 	NewStatus storage.Status `json:"new"`
-// }
 
 // ReportStatusUpdater - интерфейс для обновления статуса заявки.
 type ReportStatusUpdater interface {
@@ -29,45 +20,28 @@ func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater) http.HandlerFunc
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UpdateStatusReport"
 
-		log := l.With(
-			slog.String("op", operation),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
+		// Настройка логирования.
+		log := logger.Handler(l, operation, r)
 		log.Info("request to update report status")
 
-		// Установка типа контента для ответа
+		// Установка типа контента для ответа.
 		w.Header().Set("Content-Type", "application/json")
 
-		numStr := chi.URLParam(r, "num")
-		num, err := strconv.Atoi(numStr)
-		if err != nil || num < 1 {
+		// Получение параметров запроса.
+		num, err := number(r)
+		if err != nil {
 			log.Error("invalid report number", logger.Err(err))
 			http.Error(w, "invalid report number", http.StatusBadRequest)
 			return
 		}
-
-		// Получаем значение нового статуса.
-		s := r.URL.Query().Get("new")
-		if s == "" {
-			log.Error("empty new status")
-			http.Error(w, "incorrect new status", http.StatusBadRequest)
-			return
-		}
-		status := splitStatus(s)[0]
-		if status < 1 || status > 5 {
-			log.Error("incorrect new status", slog.Int("status", int(status)))
-			http.Error(w, "incorrect new status", http.StatusBadRequest)
+		status, err := newStatus(r)
+		if err != nil {
+			log.Error("incorrect new status", logger.Err(err))
+			http.Error(w, "incorrect new statusr", http.StatusBadRequest)
 			return
 		}
 
-		// var req updateStatusRequest
-		// if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		// 	log.Error("invalid request body", logger.Err(err))
-		// 	http.Error(w, "invalid request body", http.StatusBadRequest)
-		// 	return
-		// }
-
-		// Обновляем статус заявки
+		// Запрос в базу данных.
 		report, err := st.UpdateStatus(r.Context(), num, status)
 		if err != nil {
 			log.Error("cannot update report status", logger.Err(err))
@@ -79,13 +53,15 @@ func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater) http.HandlerFunc
 			return
 		}
 
+		// TODO: вставить нотификацию по контактам.
+
+		// Кодирование ответа в JSON.
 		err = json.NewEncoder(w).Encode(report)
 		if err != nil {
 			log.Error("cannot encode report", logger.Err(err))
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-
 		log.Debug("report status updated successfully")
 	}
 }

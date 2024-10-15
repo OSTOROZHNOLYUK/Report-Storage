@@ -7,10 +7,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"strconv"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 // ReportRemover - интерфейс для удаления заявки.
@@ -23,22 +19,20 @@ func DeleteReport(l *slog.Logger, st ReportRemover) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.DeleteReport"
 
-		log := l.With(
-			slog.String("op", operation),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
+		// Настройка логирования.
+		log := logger.Handler(l, operation, r)
 		log.Info("request to delete report")
 
-		numStr := chi.URLParam(r, "num")
-		num, err := strconv.Atoi(numStr)
-		if err != nil || num < 1 {
+		// Получение параметров запроса.
+		num, err := number(r)
+		if err != nil {
 			log.Error("invalid report number", logger.Err(err))
 			http.Error(w, "invalid report number", http.StatusBadRequest)
 			return
 		}
 
-		ctx := r.Context()
-		err = st.DeleteByNum(ctx, num)
+		// Запрос в базу данных.
+		err = st.DeleteByNum(r.Context(), num)
 		if err != nil {
 			log.Error("cannot delete report", logger.Err(err))
 			if errors.Is(err, storage.ErrReportNotFound) {
@@ -49,6 +43,7 @@ func DeleteReport(l *slog.Logger, st ReportRemover) http.HandlerFunc {
 			return
 		}
 
+		// Запись кода ответа.
 		w.WriteHeader(http.StatusNoContent)
 		log.Debug("report deleted successfully")
 	}

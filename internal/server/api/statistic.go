@@ -8,8 +8,6 @@ import (
 	"net/http"
 
 	"log/slog"
-
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 // StatisticRetriever - интерфейс для получения статистики заявок.
@@ -22,27 +20,27 @@ func Statistic(l *slog.Logger, st StatisticRetriever) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.GetStatistic"
 
-		log := l.With(
-			slog.String("op", operation),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
-		)
+		// Настройка логирования.
+		log := logger.Handler(l, operation, r)
 		log.Info("request to receive statistics")
 
-		ctx := r.Context()
-		stats, err := st.Statistic(ctx)
+		// Установка типа контента для ответа.
+		w.Header().Set("Content-Type", "application/json")
+
+		// Запрос в базу данных.
+		stats, err := st.Statistic(r.Context())
 		if err != nil {
 			log.Error("cannot retrieve statistics", logger.Err(err))
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		// Кодирование ответа в JSON.
 		if err := json.NewEncoder(w).Encode(stats); err != nil {
 			log.Error("cannot encode statistics", logger.Err(err))
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-
 		log.Debug("statistics sent successfully")
 	}
 }
