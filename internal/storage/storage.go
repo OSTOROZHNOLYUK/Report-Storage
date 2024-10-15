@@ -32,7 +32,7 @@ const (
 // Geo - тип данных географических координат точки.
 type Geo struct {
 	// Type - тип объекта, в нашем случае всегда значение "Point".
-	Type string `json:"type,omitempty" bson:"type"`
+	Type string `json:"type,omitempty" bson:"type" validate:"omitempty,max=100"`
 	// Coordinates - координаты, первый элемент - широта, второй элемент - долгота.
 	Coordinates [2]float64 `json:"coordinates" bson:"coordinates" validate:"required,dive,required"`
 }
@@ -48,38 +48,38 @@ type Contacts struct {
 // Report - основная структура заявки о проблеме.
 type Report struct {
 	// ID хранит значение ObjectID, используемое в MongoDB.
-	ID primitive.ObjectID `json:"id" bson:"_id"`
+	ID primitive.ObjectID `json:"id" bson:"_id" validate:"required,max=100"`
 
 	// Number содержит уникальный порядковый номер заявки.
-	Number int64 `json:"number" bson:"number"`
+	Number int64 `json:"number" bson:"number" validate:"required,number,min=1,max=99999999"`
 
 	// Created содержит время создания заявки с БД.
-	Created time.Time `json:"created" bson:"created"`
+	Created time.Time `json:"created" bson:"created" validate:"required"`
 
 	// Updated содержит время последнего изменения заявки.
-	Updated time.Time `json:"updated" bson:"updated"`
+	Updated time.Time `json:"updated,omitempty" bson:"updated"`
 
 	// City содержит значение города или местности заявки.
-	City string `json:"city" bson:"city"`
+	City string `json:"city" bson:"city" validate:"required,max=100"`
 
 	// Address хранит строковое представление ближайшего адреса.
-	Address string `json:"address" bson:"address"`
+	Address string `json:"address" bson:"address" validate:"required,max=100"`
 
 	// Description содержит описание заявки клиентом в свободной форме.
-	Description string `json:"description" bson:"description"`
+	Description string `json:"description" bson:"description" validate:"required,max=300"`
 
 	// Contacts содержит возможные контакты клиента.
 	Contacts Contacts `json:"contacts,omitempty" bson:"contacts,omitempty"`
 
 	// Media содержит слайс ссылок на медиа файлы по заявке.
-	Media []string `json:"media" bson:"media"`
+	Media []string `json:"media" bson:"media" validate:"required,min=1,max=5"`
 
 	// Тип Coordinates хранит географические координаты заявки.
-	Geo Geo `json:"geo" bson:"geo"`
+	Geo Geo `json:"geo" bson:"geo" validate:"required"`
 
 	// Status содержит целочисленную константу, отражающую текущий
 	// статус заявки.
-	Status Status `json:"status" bson:"status"`
+	Status Status `json:"status" bson:"status" validate:"required,number,min=1,max=5"`
 }
 
 // Filter - структура фильтра для получения заявок.

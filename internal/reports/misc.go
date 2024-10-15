@@ -45,3 +45,23 @@ func RemoveFiles(log *slog.Logger, urls []string, s3 FileSaver) {
 		}
 	}
 }
+
+// SliceDiff сравнивает слайс origin со слайсом new и возвращает
+// отсутствующие в origin строки. Слайс new не может быть длиннее
+// origin, так как подразумевается только удаление элементов.
+func SliceDiff(origin, new []string) []string {
+	m := make(map[string]int)
+	var diff []string
+
+	for _, s := range new {
+		m[s] = 1
+	}
+
+	for _, s := range origin {
+		if _, ok := m[s]; !ok {
+			diff = append(diff, s)
+		}
+	}
+
+	return diff
+}

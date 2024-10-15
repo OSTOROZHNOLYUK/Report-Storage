@@ -5,7 +5,10 @@ package logger
 import (
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 // Константы окружений
@@ -57,4 +60,14 @@ func Err(err error) slog.Attr {
 		Key:   "error",
 		Value: slog.StringValue(err.Error()),
 	}
+}
+
+// Handler возвращает логгер из пакета slog для работы в определенном
+// обработчике.
+func Handler(log *slog.Logger, operation string, r *http.Request) *slog.Logger {
+	l := log.With(
+		slog.String("op", operation),
+		slog.String("request_id", middleware.GetReqID(r.Context())),
+	)
+	return l
 }

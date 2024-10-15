@@ -10,19 +10,19 @@ import (
 	"net/http"
 )
 
-// ReportGetter - интерфейс для доступа к заявке по её номеру.
-type ReportGetter interface {
-	ReportByNum(context.Context, int) (storage.Report, error)
+// ReportStatusUpdater - интерфейс для обновления статуса заявки.
+type ReportStatusUpdater interface {
+	UpdateStatus(ctx context.Context, num int, status storage.Status) (storage.Report, error)
 }
 
-// ReportByNum обрабатывает запрос на получение заявки по её номеру.
-func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
+// UpdateStatusReport обрабатывает запрос для изменения статуса заявки.
+func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const operation = "server.api.ReportByNum"
+		const operation = "server.api.UpdateStatusReport"
 
 		// Настройка логирования.
 		log := logger.Handler(l, operation, r)
-		log.Info("request to receive report by number")
+		log.Info("request to update report status")
 
 		// Установка типа контента для ответа.
 		w.Header().Set("Content-Type", "application/json")
@@ -34,11 +34,17 @@ func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
 			http.Error(w, "invalid report number", http.StatusBadRequest)
 			return
 		}
+		status, err := newStatus(r)
+		if err != nil {
+			log.Error("incorrect new status", logger.Err(err))
+			http.Error(w, "incorrect new statusr", http.StatusBadRequest)
+			return
+		}
 
 		// Запрос в базу данных.
-		report, err := st.ReportByNum(r.Context(), num)
+		report, err := st.UpdateStatus(r.Context(), num, status)
 		if err != nil {
-			log.Error("cannot find report", logger.Err(err))
+			log.Error("cannot update report status", logger.Err(err))
 			if errors.Is(err, storage.ErrReportNotFound) {
 				http.Error(w, "report not found", http.StatusNotFound)
 				return
@@ -47,6 +53,8 @@ func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
 			return
 		}
 
+		// TODO: вставить нотификацию по контактам.
+
 		// Кодирование ответа в JSON.
 		err = json.NewEncoder(w).Encode(report)
 		if err != nil {
@@ -54,6 +62,6 @@ func ReportByNum(l *slog.Logger, st ReportGetter) http.HandlerFunc {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-		log.Debug("report sent successfully")
+		log.Debug("report status updated successfully")
 	}
 }
