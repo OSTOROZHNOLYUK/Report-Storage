@@ -2,6 +2,7 @@ package server
 
 import (
 	"Report-Storage/internal/config"
+	"Report-Storage/internal/notifications"
 	"Report-Storage/internal/s3cloud"
 	"Report-Storage/internal/server/api"
 	"Report-Storage/internal/storage/mongodb"
@@ -20,9 +21,10 @@ import (
 
 // Server - структура сервера.
 type Server struct {
-	srv *http.Server
-	mux *chi.Mux
-	jwt *jwtauth.JWTAuth
+	srv  *http.Server
+	mux  *chi.Mux
+	jwt  *jwtauth.JWTAuth
+	mail *notifications.SMTP
 }
 
 // New - конструктор сервера.
@@ -30,6 +32,8 @@ func New(cfg *config.Config) *Server {
 	r := chi.NewRouter()
 	j := jwtauth.New("HS256", []byte(cfg.JwtSecret), nil, jwt.WithAcceptableSkew(time.Second*30))
 	j.ValidateOptions()
+	m := notifications.New(cfg.Sender, cfg.SMTPLogin, cfg.SMTPPasswd, cfg.SMTPHost, cfg.SMTPPort)
+
 	server := &Server{
 		srv: &http.Server{
 			Addr:         cfg.Address,
@@ -38,8 +42,9 @@ func New(cfg *config.Config) *Server {
 			WriteTimeout: cfg.WriteTimeout,
 			IdleTimeout:  cfg.IdleTimeout,
 		},
-		mux: r,
-		jwt: j,
+		mux:  r,
+		jwt:  j,
+		mail: m,
 	}
 	return server
 }
@@ -59,7 +64,7 @@ func (s *Server) Start() {
 // API инициализирует все обработчики API.
 func (s *Server) API(log *slog.Logger, st *mongodb.Storage, s3 *s3cloud.FileStorage) {
 	// Создание заявки.
-	s.mux.Post("/api/reports/new", api.AddReport(log, st, s3))
+	s.mux.Post("/api/reports/new", api.AddReport(log, st, s3, s.mail))
 
 	// Безопасные методы.
 	s.mux.Post("/api/reports/quad", api.ReportsByPoly(log, st))       // получение заявок в границах многоугольника
@@ -74,11 +79,11 @@ func (s *Server) API(log *slog.Logger, st *mongodb.Storage, s3 *s3cloud.FileStor
 		r.Use(jwtauth.Verifier(s.jwt))
 		r.Use(jwtauth.Authenticator(s.jwt))
 
-		r.Put("/api/reports", api.UpdateReport(log, st, s3))                  // обновление всех полей заявки
-		r.Patch("/api/reports/status/{num}", api.UpdateStatusReport(log, st)) // обновление статуса заявки по ее номеру
-		r.Delete("/api/reports/{num}", api.DeleteReport(log, st))             // удаление заявки по ее номеру
-		r.Delete("/api/reports/rejected", api.DeleteRejected(log, st))        // удаление всех заявок со статусом "Отклонена"
-		r.Get("/api/reports/statistic", api.Statistic(log, st))               // получение статистики по всем заявкам
+		r.Put("/api/reports", api.UpdateReport(log, st, s3, s.mail))                  // обновление всех полей заявки
+		r.Patch("/api/reports/status/{num}", api.UpdateStatusReport(log, st, s.mail)) // обновление статуса заявки по ее номеру
+		r.Delete("/api/reports/{num}", api.DeleteReport(log, st))                     // удаление заявки по ее номеру
+		r.Delete("/api/reports/rejected", api.DeleteRejected(log, st))                // удаление всех заявок со статусом "Отклонена"
+		r.Get("/api/reports/statistic", api.Statistic(log, st))                       // получение статистики по всем заявкам
 	})
 }
 

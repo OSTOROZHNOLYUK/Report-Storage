@@ -150,3 +150,21 @@ func newStatus(r *http.Request) (storage.Status, error) {
 	}
 	return status, nil
 }
+
+// statusString возвращает строковое представление статуса заявки.
+func statusString(s storage.Status) string {
+	switch s {
+	case 1:
+		return "Неподтверждена"
+	case 2:
+		return "Создана"
+	case 3:
+		return "В работе"
+	case 4:
+		return "Завершена"
+	case 5:
+		return "Отклонена"
+	default:
+		return ""
+	}
+}
