@@ -2,6 +2,7 @@ package api
 
 import (
 	"Report-Storage/internal/logger"
+	"Report-Storage/internal/notifications"
 	"Report-Storage/internal/reports"
 	"Report-Storage/internal/storage"
 	"context"
@@ -22,7 +23,7 @@ type ReportUpdater interface {
 
 // UpdateReport обрабатывает запрос на обновление заявки по
 // уникальному номеру.
-func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.HandlerFunc {
+func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver, notify *notifications.SMTP) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UpdateReport"
 
@@ -83,11 +84,14 @@ func UpdateReport(l *slog.Logger, st ReportUpdater, s3 reports.FileSaver) http.H
 			}
 		}
 
-		// Проверка изменения статуса.
-		if origin.Status != report.Status {
-
-			// TODO: вставить нотификацию по контактам.
-			log.Debug("status changed")
+		// Проверка изменения статуса и отправка уведомления об этом.
+		if origin.Status != report.Status && report.Contacts.Email != "" {
+			go func() {
+				err := notifications.StatusChanged(notify, report.Contacts.Email, statusString(report.Status))
+				if err != nil {
+					log.Error("failed to send notification to email", logger.Err(err))
+				}
+			}()
 		}
 
 		// Кодирование ответа в JSON.

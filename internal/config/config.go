@@ -18,6 +18,7 @@ type Config struct {
 	StoragePasswd string `yaml:"storage_passwd" env:"MONGO_DB_PASSWD" env-required:"true"`
 	JwtSecret     string `yaml:"jwt_secret" env:"JWT_SECRET" env-required:"true"`
 	S3Storage     `yaml:"s3storage"`
+	SMTP          `yaml:"smtp"`
 	HTTPServer    `yaml:"http_server"`
 }
 type S3Storage struct {
@@ -26,6 +27,13 @@ type S3Storage struct {
 	AccessKey string `yaml:"access_key" env:"S3_ACCESS_KEY" env-required:"true"`
 	SecretKey string `yaml:"secret_key" env:"S3_SECRET_KEY" env-required:"true"`
 	Domain    string `yaml:"domain" env-default:"https://49078864-cdaa-43c7-bff7-9dc64dd6bf93.selstorage.ru"`
+}
+type SMTP struct {
+	Sender     string `yaml:"sender" env-default:"mail@luk.sf-hackathon.xyz"`
+	SMTPLogin  string `yaml:"smtp_login" env-default:"2749"`
+	SMTPPasswd string `yaml:"smtp_password" env:"SMTP_PASSWD"`
+	SMTPHost   string `yaml:"smtp_host" env-default:"smtp.mail.selcloud.ru"`
+	SMTPPort   string `yaml:"smtp_port" env-default:"1126"`
 }
 type HTTPServer struct {
 	Address      string        `yaml:"address" env-default:"0.0.0.0:80"`

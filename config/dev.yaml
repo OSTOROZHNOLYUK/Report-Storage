@@ -13,6 +13,13 @@ s3storage:
   access_key: "S3_ACCESS_KEY"
   secret_key: "S3_SECRET_KEY"
   domain: "https://49078864-cdaa-43c7-bff7-9dc64dd6bf93.selstorage.ru"
+# SMTP
+smtp:
+  sender: "mail@sf-hackathon.xyz"
+  smtp_login: "MS_t6BYU8@sf-hackathon.xyz"
+  smtp_password: "SMTP_PASSWD"
+  smtp_host: "smtp.mailersend.net"
+  smtp_port: "587"
 # Server
 http_server:
   address: "0.0.0.0:10502"

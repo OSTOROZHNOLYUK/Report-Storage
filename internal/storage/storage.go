@@ -66,7 +66,7 @@ type Report struct {
 	Address string `json:"address" bson:"address" validate:"required,max=100"`
 
 	// Description содержит описание заявки клиентом в свободной форме.
-	Description string `json:"description" bson:"description" validate:"required,max=300"`
+	Description string `json:"description" bson:"description" validate:"omitempty,max=300"`
 
 	// Contacts содержит возможные контакты клиента.
 	Contacts Contacts `json:"contacts,omitempty" bson:"contacts,omitempty"`

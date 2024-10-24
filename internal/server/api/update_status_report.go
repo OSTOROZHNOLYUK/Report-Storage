@@ -2,6 +2,7 @@ package api
 
 import (
 	"Report-Storage/internal/logger"
+	"Report-Storage/internal/notifications"
 	"Report-Storage/internal/storage"
 	"context"
 	"encoding/json"
@@ -16,7 +17,7 @@ type ReportStatusUpdater interface {
 }
 
 // UpdateStatusReport обрабатывает запрос для изменения статуса заявки.
-func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater) http.HandlerFunc {
+func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater, notify *notifications.SMTP) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UpdateStatusReport"
 
@@ -53,7 +54,15 @@ func UpdateStatusReport(l *slog.Logger, st ReportStatusUpdater) http.HandlerFunc
 			return
 		}
 
-		// TODO: вставить нотификацию по контактам.
+		// Отправка уведомления об изменении статуса заявки.
+		if report.Contacts.Email != "" {
+			go func() {
+				err := notifications.StatusChanged(notify, report.Contacts.Email, statusString(report.Status))
+				if err != nil {
+					log.Error("failed to send notification to email", logger.Err(err))
+				}
+			}()
+		}
 
 		// Кодирование ответа в JSON.
 		err = json.NewEncoder(w).Encode(report)

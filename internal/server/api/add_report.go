@@ -2,6 +2,7 @@ package api
 
 import (
 	"Report-Storage/internal/logger"
+	"Report-Storage/internal/notifications"
 	"Report-Storage/internal/reports"
 	"log/slog"
 	"net/http"
@@ -19,7 +20,7 @@ const (
 
 // AddReport обрабатывает запрос на добавление новой заявки в хранилище.
 // При успехе возвращает код 201 и уникальный номер заявки.
-func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) http.HandlerFunc {
+func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver, notify *notifications.SMTP) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const operation = "server.api.UploadFiles"
 
@@ -104,6 +105,16 @@ func AddReport(l *slog.Logger, st reports.ReportAdder, s3 reports.FileSaver) htt
 			return
 		}
 		log.Debug("new report added successfully")
+
+		// Отправка уведомления о создании новой заявки.
+		if report.Contacts.Email != "" {
+			go func() {
+				err := notifications.NewReport(notify, report.Contacts.Email)
+				if err != nil {
+					log.Error("failed to send notification to email", logger.Err(err))
+				}
+			}()
+		}
 
 		// Запись ответа в text/plain и установка кода 201.
 		render.Status(r, http.StatusCreated)
